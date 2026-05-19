@@ -664,7 +664,7 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
 
     <!-- ── SQL TEMPLATES ── -->
     <div class="plan-section active" id="plan-sql">
-      <div class="plan-h2">💾 SQL Templates — 23 Reference Queries</div>
+      <div class="plan-h2">💾 SQL Templates — 26 Reference Queries</div>
       <p style="font-size:12px;color:#636E72;margin-bottom:6px">All queries use Databricks SQL syntax against <code style="font-size:11px">shared.revops</code>.</p>
       <div class="info-box" style="margin-bottom:18px"><strong>💡 Tip:</strong> Copy any query and paste it into Claude alongside your dashboard request. Claude will use these as the reference logic to calculate metrics correctly — no need to re-explain the business rules.</div>
 
@@ -3008,7 +3008,372 @@ LEFT JOIN sqls s         ON bk.metric_month=s.metric_month           AND bk.pipe
 LEFT JOIN won_lost_bookings wlb ON bk.metric_month=wlb.metric_month  AND bk.pipeline_name=wlb.pipeline_name  AND bk.segment=wlb.segment  AND bk.department_source_clean=wlb.department_source_clean
 LEFT JOIN dq_summary dqs ON bk.metric_month=dqs.metric_month         AND bk.pipeline_name=dqs.pipeline_name         AND bk.segment=dqs.segment         AND bk.department_source_clean=dqs.department_source_clean
 LEFT JOIN velocity v     ON bk.metric_month=v.metric_month           AND bk.pipeline_name=v.pipeline_name           AND bk.segment=v.segment           AND bk.department_source_clean=v.department_source_clean
-LEFT JOIN pipeline_mrr pm ON bk.metric_month=pm.metric_month         AND bk.pipeline_name=pm.pipeline_name         AND bk.segment=pm.segment         AND bk.department_source_clean=pm.department_source_clean;` }];
+LEFT JOIN pipeline_mrr pm ON bk.metric_month=pm.metric_month         AND bk.pipeline_name=pm.pipeline_name         AND bk.segment=pm.segment         AND bk.department_source_clean=pm.department_source_clean;` },
+
+  { title: '🏗️ silver_company — Full CREATE TABLE SQL', sql: `USE CATALOG shared;
+USE SCHEMA revops;
+
+CREATE OR REPLACE TABLE shared.revops.silver_company AS
+SELECT
+  CT.CompanyId                          AS Company_id,
+  CT.CompanyName                        AS Company_name,
+  CT.registered_company_name            AS Registered_company_name,
+  CT.domain                             AS Company_domain_name,
+  CASE
+    WHEN CT.hs_all_assigned_business_unit_ids LIKE '%0%'
+         AND CT.hs_all_assigned_business_unit_ids LIKE '%176662%' THEN 'PH Sprout, TH Sprout'
+    WHEN CT.hs_all_assigned_business_unit_ids LIKE '%0%'          THEN 'PH Sprout'
+    WHEN CT.hs_all_assigned_business_unit_ids LIKE '%176662%'     THEN 'TH Sprout'
+    ELSE 'Other'
+  END                                   AS Brands,
+  CT.address                            AS Street_address,
+  CT.city                               AS City,
+  CT.country_state                      AS State_country,
+  CT.geo_region                         AS Geo_region,
+  CT.geo_province                       AS Province,
+  CT.province_a_to_l__ph_               AS City_municipality_province,
+  CASE
+    WHEN CT.segment__sprout_current_ = 'MICRO' THEN 'SME'
+    ELSE CT.segment__sprout_current_
+  END                                   AS Segment,
+  CT.segment__csm_                      AS Service_level_csm,
+  COALESCE(CT.industry__sprout_official_2025, CT.industry__sprout_official_)           AS Industry,
+  COALESCE(CT.sub_industry__sprout_official_2025, CT.sub_industry__sprout_official_)   AS Sub_industry,
+  try_cast(NULLIF(CT.headcount, '') AS DOUBLE)         AS Headcount,
+  try_cast(NULLIF(CT.hr_headcount, '') AS DOUBLE)      AS HR_headcount_active_client,
+  try_cast(NULLIF(CT.payroll_headcount, '') AS DOUBLE) AS Payroll_headcount_active_client,
+  CT.freemium_status                    AS Freemium_status,
+  try_cast(NULLIF(CT.founded_year, '') AS DOUBLE)      AS Year_founded,
+  CONCAT_WS(' ', COW.FirstName, COW.LastName)          AS company_owner,
+  regexp_replace(regexp_replace(COW.Teams, '\\[|\\]|"', ''), ',', ', ') AS hubspot_team,
+  CT.lifecyclestage                     AS Lifecycle_stage,
+  CT.client_stage                       AS Client_stage,
+  CT.client_status                      AS Client_status,
+  CT.client_type                        AS Client_type,
+  CT.account_tier                       AS Account_tier,
+  CT.next_renewal_date                  AS Next_renewal_date,
+  CT.churn_effectivity_date             AS Churn_effectivity_date,
+  CT.hand_over_date                     AS Project_handover_date,
+  CT.notes_last_updated                 AS Last_activity_date,
+  try_cast(NULLIF(CT.netsuite_id, '') AS STRING)       AS Netsuite_id,
+  CT.hs_is_target_account               AS Target_account,
+  CT.strategic_account                  AS Strategic_account,
+  CT.department_source                  AS Department_source,
+  CT.reason_of_churn                    AS Churn_reason,
+  CT.hs_lead_status                     AS Lead_status,
+  CT.website                            AS Website_url,
+  CT.sprout_hr_url                      AS Sprout_hr_url,
+  CT.payroll_company_code               AS Payroll_company_code,
+  DATEADD(HOUR, 8, CT.createdate)       AS Create_date,
+  CONCAT_WS(' ', OW1.FirstName, OW1.LastName) AS Sales_Consultant,
+  CONCAT_WS(' ', OW2.FirstName, OW2.LastName) AS Sales_Consultant_2,
+  CONCAT_WS(' ', OW3.FirstName, OW3.LastName) AS Inbound_lead_source_caller,
+  CONCAT_WS(' ', OW4.FirstName, OW4.LastName) AS Lead_gen_data_miner,
+  CONCAT_WS(' ', OW5.FirstName, OW5.LastName) AS Customer_Success_Manager
+FROM federated_hubspot.dbo.company CT
+LEFT JOIN federated_hubspot.dbo.owner COW ON CT.hubspot_owner_id = COW.hubspot_owner_id
+LEFT JOIN federated_hubspot.dbo.owner OW1 ON CT.hrtc = OW1.hubspot_owner_id
+LEFT JOIN federated_hubspot.dbo.owner OW2 ON CT.hrtc_2_ = OW2.hubspot_owner_id
+LEFT JOIN federated_hubspot.dbo.owner OW3 ON CT.inbound_lead_source = OW3.hubspot_owner_id
+LEFT JOIN federated_hubspot.dbo.owner OW4 ON CT.lead_gen = OW4.hubspot_owner_id
+LEFT JOIN federated_hubspot.dbo.owner OW5 ON CT.customer_success_manager = OW5.hubspot_owner_id;` },
+
+  { title: '🏗️ silver_line_items — Full CREATE TABLE SQL', sql: `USE CATALOG shared;
+USE SCHEMA revops;
+
+CREATE OR REPLACE TABLE shared.revops.silver_line_items AS
+WITH base AS (
+  SELECT
+    li.ObjectId                           AS line_item_id,
+    li.hs_object_id                       AS record_id,
+    DLIA.DealId                           AS deal_id,
+    li.name                               AS product_name,
+    CASE
+      WHEN li.name LIKE '%JazzHR%'            THEN 'JazzHR'
+      WHEN li.name LIKE '%OliviaXpense%'      THEN 'Olivia Expense'
+      WHEN li.name LIKE '%Performance Only%'  THEN 'Performance+'
+      WHEN li.name LIKE '%Britana%'           THEN 'Britana'
+      WHEN li.name LIKE '%Disprz%'            THEN 'Disprz'
+      WHEN li.name LIKE '%Kwik Insure%'       THEN 'Kwik Insure'
+      WHEN li.name LIKE '%Tability%'          THEN 'Tability'
+      WHEN li.name LIKE '%Wellness%'          THEN 'Wellness'
+      WHEN li.name LIKE '%HR & Payroll%'      THEN 'HR and Payroll'
+      WHEN li.name LIKE '%Beppo%'             THEN 'Beppo'
+      WHEN li.name LIKE '%Twala%'             THEN 'Twala'
+      WHEN li.name LIKE '%Smile%'             THEN 'Smile'
+      WHEN li.name LIKE '%Netsuite%'          THEN 'Netsuite'
+      ELSE li.name
+    END                                   AS parent_product,
+    li.product_category                   AS product_category,
+    li.product_group                      AS product_group,
+    li.product_status                     AS product_status,
+    li.business_unit                      AS business_unit,
+    li.price_type                         AS price_type,
+    li.recurringbillingfrequency          AS recurring_billing_frequency,
+    li.quantity                           AS quantity,
+    li.of_users                           AS number_of_users,
+    li.price                              AS unit_price,
+    li.amount                             AS amount,
+    li.discount                           AS discount,
+    li.hs_total_discount                  AS total_discount,
+    li.hs_mrr                             AS mrr,
+    li.hs_arr                             AS arr,
+    li.hs_acv                             AS acv,
+    li.hs_tcv                             AS tcv,
+    li.revenue_share                      AS revenue_share,
+    CASE
+      WHEN li.hs_recurring_billing_period LIKE '%M'
+        THEN CAST(REGEXP_REPLACE(li.hs_recurring_billing_period, '[^0-9]', '') AS INT)
+      WHEN li.hs_recurring_billing_period LIKE '%Y'
+        THEN CAST(REGEXP_REPLACE(li.hs_recurring_billing_period, '[^0-9]', '') AS INT) * 12
+      ELSE NULL
+    END                                   AS billing_term_months,
+    li.hs_term_in_months                  AS contract_term_months,
+    DATEADD(HOUR, 8, li.createdate)          AS create_date,
+    DATEADD(HOUR, 8, li.hs_lastmodifieddate) AS last_modified_date
+  FROM federated_hubspot.dbo.LineItem li
+  LEFT JOIN federated_hubspot.dbo.DealLineItemAssociations DLIA
+    ON li.ObjectId = DLIA.ObjectId
+),
+filtered AS (
+  SELECT * FROM base
+  WHERE product_name NOT IN ('britana - growth plan', 'britana - premium plan')
+)
+SELECT
+  line_item_id, record_id, deal_id,
+  product_name, parent_product, product_category, product_group,
+  product_status, business_unit, price_type,
+  recurring_billing_frequency, quantity, number_of_users,
+  unit_price, amount, discount, total_discount,
+  mrr, arr, acv, tcv, revenue_share,
+  billing_term_months, contract_term_months,
+  create_date, last_modified_date
+FROM filtered;` },
+
+  { title: '🏗️ silver_deals — Full CREATE TABLE SQL (+ stage/tag mappings)', sql: `USE CATALOG shared;
+USE SCHEMA revops;
+
+-- ── 1. DEAL STAGE MAPPING ─────────────────────────────────────────────────────
+CREATE OR REPLACE TABLE shared.revops.deal_stage_mapping (
+  pipeline_name STRING, dealstage STRING, client_journey_stage STRING
+);
+INSERT OVERWRITE shared.revops.deal_stage_mapping VALUES
+  ('Sales Pipeline','175292953','MQL'),('Sales Pipeline','1018513787','MQL'),
+  ('Sales Pipeline','1175338837','MQL'),('Sales Pipeline','175292954','Opportunity'),
+  ('Sales Pipeline','175292955','Opportunity'),('Sales Pipeline','175292956','Opportunity'),
+  ('Sales Pipeline','175292957','Opportunity'),('Sales Pipeline','175292958','Customer'),
+  ('Sales Pipeline','1151168839','Customer'),('Sales Pipeline','1173384728','Customer'),
+  ('Sales Pipeline','175292959','Closed Lost'),
+  ('TH Sales Pipeline','199723881','MQL'),('TH Sales Pipeline','1286051723','MQL'),
+  ('TH Sales Pipeline','1286051724','MQL'),('TH Sales Pipeline','199723882','Opportunity'),
+  ('TH Sales Pipeline','199723883','Opportunity'),('TH Sales Pipeline','199723884','Opportunity'),
+  ('TH Sales Pipeline','199723885','Opportunity'),('TH Sales Pipeline','199723886','Customer'),
+  ('TH Sales Pipeline','1286051725','Customer'),('TH Sales Pipeline','1286051726','Customer'),
+  ('TH Sales Pipeline','199723887','Closed Lost'),
+  ('Unified Channel Pipeline','244467771','MQL'),('Unified Channel Pipeline','1175445540','MQL'),
+  ('Unified Channel Pipeline','244467772','Opportunity'),('Unified Channel Pipeline','244467773','Opportunity'),
+  ('Unified Channel Pipeline','244467775','Opportunity'),('Unified Channel Pipeline','244467774','Opportunity'),
+  ('Unified Channel Pipeline','244467776','Customer'),('Unified Channel Pipeline','1151168840','Customer'),
+  ('Unified Channel Pipeline','1173640540','Customer'),('Unified Channel Pipeline','244467777','Closed Lost'),
+  ('PH Upsell Pipeline','1146806836','MQL'),('PH Upsell Pipeline','1186144397','MQL'),
+  ('PH Upsell Pipeline','1146693964','MQL'),('PH Upsell Pipeline','1146806837','Opportunity'),
+  ('PH Upsell Pipeline','1146806838','Opportunity'),('PH Upsell Pipeline','1146806839','Opportunity'),
+  ('PH Upsell Pipeline','1146806840','Opportunity'),('PH Upsell Pipeline','1146806841','Customer'),
+  ('PH Upsell Pipeline','1146693965','Customer'),('PH Upsell Pipeline','1219155314','Customer'),
+  ('PH Upsell Pipeline','1146806842','Closed Lost');
+
+-- ── 2. DEAL TAG MAPPING ───────────────────────────────────────────────────────
+CREATE OR REPLACE TABLE shared.revops.deal_tag_mapping (
+  hs_tag_id STRING, deal_tag STRING, tag_category STRING
+);
+INSERT OVERWRITE shared.revops.deal_tag_mapping VALUES
+  ('16152843','For Rescheduling with LDU','LDU'),('16152844','Rescheduled','LDU'),
+  ('16350183','For Rescheduling','LDU'),('16152850','Supported','Engagement'),
+  ('16152852','Fully Accepted','Engagement'),('16247117','Conditionally Accepted','Engagement'),
+  ('16152853','Not Accepted','Engagement'),('16750506','Lost Cadence','Status'),
+  ('19331381','Disqualified','Status'),('16243633','Third Party Referral Product','Product'),
+  ('17030478','Channel New Business','Channel'),('17030479','Channel Upsell','Channel'),
+  ('17030481','Channel Renewal','Channel'),('17096088','Channel Expansion','Channel'),
+  ('20087694','MEDIUM RISK','Risk'),('20087765','HIGH RISK','Risk'),
+  ('20091769','LOW RISK','Risk'),('20087769','CRITICAL','Risk');
+
+-- ── 3. SILVER DEALS ───────────────────────────────────────────────────────────
+CREATE OR REPLACE TABLE shared.revops.silver_deals AS
+WITH dca_dedup AS (
+  SELECT DealId, CompanyId FROM (
+    SELECT DealId, CompanyId,
+      ROW_NUMBER() OVER (
+        PARTITION BY DealId ORDER BY
+          CASE WHEN TRIM(COALESCE(LabelDealCompany,''))='Primary' THEN 1 ELSE 2 END, CompanyId
+      ) AS rn
+    FROM federated_hubspot.dbo.DealCompanyAssociations
+  ) x WHERE rn = 1
+),
+line_item_mrr AS (
+  SELECT sli.deal_id,
+    SUM(CASE WHEN LOWER(TRIM(COALESCE(sli.recurring_billing_frequency,''))) <> 'one time payment'
+              AND COALESCE(sli.contract_term_months,0) >= 12
+              AND sli.product_name <> 'Instacash' AND sli.product_name NOT LIKE '%Ready%'
+         THEN COALESCE(sli.mrr,0) ELSE 0 END) AS line_item_mrr,
+    SUM(CASE WHEN LOWER(TRIM(COALESCE(sli.recurring_billing_frequency,''))) <> 'one time payment'
+              AND COALESCE(sli.contract_term_months,0) >= 12
+              AND sli.product_name IN ('ReadyCash','ReadyWage')
+         THEN COALESCE(sli.mrr,0) ELSE 0 END) AS ef_mrr
+  FROM shared.revops.silver_line_items sli GROUP BY sli.deal_id
+),
+line_item_otp AS (
+  SELECT sli.deal_id,
+    SUM(CASE WHEN LOWER(TRIM(COALESCE(sli.recurring_billing_frequency,'')))=''
+              AND sli.product_name <> 'Instacash'
+              AND sli.product_name NOT LIKE '%Ready%' AND sli.product_name NOT LIKE '%Implementation%'
+         THEN COALESCE(sli.amount,0) ELSE 0 END) AS otp_only,
+    SUM(CASE WHEN LOWER(TRIM(COALESCE(sli.recurring_billing_frequency,'')))<>''
+              AND COALESCE(sli.contract_term_months,0)>=1 AND COALESCE(sli.contract_term_months,0)<12
+              AND sli.product_name <> 'Instacash'
+              AND sli.product_name NOT LIKE '%Ready%' AND sli.product_name NOT LIKE '%Implementation%'
+         THEN COALESCE(sli.unit_price,0)*COALESCE(sli.contract_term_months,0) ELSE 0 END) AS mrr_lt_12,
+    SUM(CASE WHEN sli.product_name LIKE '%Implementation%' THEN COALESCE(sli.amount,0) ELSE 0 END) AS implem_fee
+  FROM shared.revops.silver_line_items sli GROUP BY sli.deal_id
+),
+base AS (
+  SELECT DT.DealId, DT.amount, DT.dealname, CAST(DT.dealstage AS STRING) AS dealstage,
+    DT.department_source, DT.segment_official,
+    DATEADD(HOUR,8,DT.closedate) AS closedate, DATEADD(HOUR,8,DT.createdate) AS createdate,
+    CAST(DT.pipeline AS STRING) AS pipeline,
+    DT.campaign_id, DT.closed_lost_reason, DT.demo_date, DT.disco__demo_date,
+    DT.days_to_close, DT.deal_duration, DT.hs_analytics_source,
+    DT.hs_analytics_source_data_1, DT.hs_analytics_source_data_2,
+    DT.hs_arr, DT.hs_mrr, DT.hs_tcv, DT.weighted_mrr,
+    LIM.line_item_mrr, LIM.ef_mrr, LIO.otp_only, LIO.mrr_lt_12, LIO.implem_fee,
+    DT.hubspot_team_id, DT.payment_terms, DT.projected_close_date,
+    DT.reasons_for_lost_deal, DT.original_channel_source, DT.deal_revival_,
+    DT.original_source_of_awareness, DT.hubspot_owner_id,
+    DT.pain_point_1, DT.pain_point_2, DT.pain_point_3, DT.top_three_pain_points,
+    DT.name_of_competitors, OW.Email, OW.FirstName, OW.LastName,
+    CONCAT_WS(' ',OW.FirstName,OW.LastName) AS sales_rep,
+    DCA.CompanyId, DT.city_municipality__province, DT.headcount_1_,
+    DT.inbound_lead, DT.looking_for_product__main_services_,
+    DT.product_needed__main_services_, DT.partner_on_record, DT.revenue_share,
+    DT.demo_scheduled, DT.hs_tag_ids, DT.complete_client_documents_,
+    DT.initial_proposal_send_date, DT.disco_demo_status,
+    DT.demo_rescheduled_1, DT.demo_rescheduled_2, DT.qualified_lead,
+    DT.ldu_upsell_, DT.new_ldu_probability_to_buy_score, DT.new_ldu_budget,
+    DT.new_ldu_needs, DT.new_ldu_needs_against_competitors, DT.new_ldu_timeline_against_need,
+    DT.buyer_role, DT.hs_all_assigned_business_unit_ids, DT.hs_created_by_user_id,
+    DT.hs_all_deal_split_owner_ids, DT.type_of_deal, DT.hs_manual_forecast_category,
+    DT.notes, DT.with_notes, DT.co_owner, DT.executive_coverage, DT.dq_reason,
+    DT.products_availed__main_services_, DT.client_type,
+    CASE WHEN DT.pipeline='95256425'  THEN 'Sales Pipeline'
+         WHEN DT.pipeline='112122277' THEN 'TH Sales Pipeline'
+         WHEN DT.pipeline='143428957' THEN 'Unified Channel Pipeline'
+         WHEN DT.pipeline='784069965' THEN 'PH Upsell Pipeline'
+         ELSE 'Unknown' END AS pipeline_name,
+    CASE WHEN DT.pipeline='784069965' THEN 'Upsell Deals'
+         WHEN DT.pipeline='112122277' THEN 'TH Deals'
+         ELSE 'New Business' END AS deal_type
+  FROM federated_hubspot.dbo.deal DT
+  LEFT JOIN federated_hubspot.dbo.owner OW ON DT.hubspot_owner_id = OW.hubspot_owner_id
+  LEFT JOIN dca_dedup DCA ON DT.DealId = DCA.DealId
+  LEFT JOIN line_item_mrr LIM ON DT.DealId = LIM.deal_id
+  LEFT JOIN line_item_otp LIO ON DT.DealId = LIO.deal_id
+),
+filtered AS (
+  SELECT * FROM base
+  WHERE pipeline_name IN ('Sales Pipeline','TH Sales Pipeline','Unified Channel Pipeline','PH Upsell Pipeline')
+  AND DealId NOT IN (16903137841,12818753345)
+),
+tags_exploded AS (
+  SELECT f.DealId, TRIM(tag_id) AS hs_tag_id FROM filtered f
+  LATERAL VIEW OUTER EXPLODE(SPLIT(REGEXP_REPLACE(REGEXP_REPLACE(COALESCE(f.hs_tag_ids,''),'\\s*;\\s*',','),'\\s*,\\s*',','),',')) e AS tag_id
+),
+tags_joined AS (
+  SELECT te.DealId, dtm.deal_tag, dtm.tag_category FROM tags_exploded te
+  LEFT JOIN shared.revops.deal_tag_mapping dtm ON te.hs_tag_id = dtm.hs_tag_id
+  WHERE te.hs_tag_id <> ''
+),
+tags_agg AS (
+  SELECT DealId,
+    CONCAT_WS(', ',SORT_ARRAY(COLLECT_SET(deal_tag))) AS deal_tags,
+    CONCAT_WS(', ',SORT_ARRAY(COLLECT_SET(tag_category))) AS tag_categories
+  FROM tags_joined GROUP BY DealId
+),
+split_owner_exploded AS (
+  SELECT f.DealId, TRIM(split_owner_id) AS split_owner_id FROM filtered f
+  LATERAL VIEW OUTER EXPLODE(SPLIT(REGEXP_REPLACE(REGEXP_REPLACE(COALESCE(f.hs_all_deal_split_owner_ids,''),'\\s*;\\s*',','),'\\s*,\\s*',','),',')) e AS split_owner_id
+),
+split_owner_joined AS (
+  SELECT soe.DealId, CONCAT_WS(' ',so.FirstName,so.LastName) AS split_owner_name
+  FROM split_owner_exploded soe
+  LEFT JOIN federated_hubspot.dbo.owner so ON CAST(soe.split_owner_id AS STRING)=CAST(so.hubspot_owner_id AS STRING)
+  WHERE soe.split_owner_id <> ''
+),
+split_owner_agg AS (
+  SELECT DealId, CONCAT_WS(', ',SORT_ARRAY(COLLECT_SET(split_owner_name))) AS deal_split_owner_names
+  FROM split_owner_joined WHERE split_owner_name IS NOT NULL AND split_owner_name <> ''
+  GROUP BY DealId
+)
+SELECT
+  f.DealId AS deal_id, f.dealname AS deal_name, f.pipeline_name, f.deal_type,
+  dps.StageLabel AS stage_label, COALESCE(dsm.client_journey_stage,'Unknown') AS client_journey_stage,
+  f.createdate AS create_date, f.closedate AS close_date,
+  f.projected_close_date, DATEDIFF(f.closedate,f.createdate) AS deal_velocity_days,
+  f.days_to_close, f.deal_duration,
+  f.amount, COALESCE(f.line_item_mrr,0) AS mrr, COALESCE(f.ef_mrr,0) AS ef_mrr,
+  COALESCE(f.otp_only,0) AS otp_only, COALESCE(f.mrr_lt_12,0) AS mrr_lt_12,
+  COALESCE(f.implem_fee,0) AS implem_fee,
+  f.hs_tcv AS tcv, f.hs_arr AS arr, f.payment_terms,
+  f.sales_rep, CONCAT_WS(' ',OW_INBOUND.FirstName,OW_INBOUND.LastName) AS inbound_lead,
+  CONCAT_WS(' ',coo.FirstName,coo.LastName) AS co_owner,
+  soa.deal_split_owner_names,
+  regexp_replace(regexp_replace(OW_TEAM.Teams,'\\[|\\]|"',''),',',' ') AS hubspot_team,
+  f.CompanyId AS company_id,
+  CASE WHEN f.segment_official='MICRO' THEN 'SME' ELSE f.segment_official END AS segment,
+  f.city_municipality__province AS city_municipality_province,
+  f.headcount_1_ AS headcount, f.client_type,
+  f.department_source AS department_source_raw,
+  CASE
+    WHEN f.department_source='SDR Outbound' THEN 'LDU Outbound'
+    WHEN f.deal_type='New Business' AND f.department_source IN ('MKT Inbound','In-house Account','CSM Inbound') THEN 'MKT Inbound'
+    WHEN f.deal_type='New Business' AND f.department_source IN ('LDU Outbound','SDR Outbound')                  THEN 'LDU Outbound'
+    WHEN f.deal_type='New Business' AND f.department_source='Sales Outbound'                                    THEN 'Sales Outbound'
+    WHEN f.deal_type='New Business' AND f.department_source='Channels'                                         THEN 'Channels'
+    WHEN f.deal_type='New Business' AND f.department_source='Product Led Growth (PLG)'                         THEN 'Product Led Growth (PLG)'
+    WHEN f.deal_type='New Business' AND f.department_source='Upsell Outbound'                                  THEN 'Upsell Outbound'
+    WHEN f.deal_type='Upsell Deals' AND f.department_source='CSM Inbound'                                      THEN 'CSM Inbound'
+    WHEN f.deal_type='Upsell Deals' AND f.department_source IN ('LDU Upsell','LDU Outbound','SDR Outbound')    THEN 'LDU Outbound'
+    WHEN f.deal_type='Upsell Deals' AND f.department_source IN ('Upsell Outbound','CSM Outbound')              THEN 'Upsell Outbound'
+    WHEN f.deal_type='Upsell Deals' AND f.department_source='Product Led Growth (PLG)'                         THEN 'Product Led Growth (PLG)'
+    WHEN f.deal_type='Upsell Deals' AND f.department_source='MKT Inbound'                                      THEN 'MKT Inbound'
+    WHEN f.deal_type='Upsell Deals' AND f.department_source='In-house Account'                                 THEN 'MKT Inbound'
+    ELSE f.department_source
+  END AS department_source_clean,
+  f.campaign_id, f.original_channel_source, f.original_source_of_awareness,
+  f.hs_analytics_source AS analytics_source,
+  f.hs_analytics_source_data_1 AS analytics_source_data_1,
+  f.hs_analytics_source_data_2 AS analytics_source_data_2,
+  f.demo_date, f.disco__demo_date AS disco_demo_date, f.demo_scheduled,
+  f.disco_demo_status, f.demo_rescheduled_1, f.demo_rescheduled_2,
+  f.initial_proposal_send_date, f.complete_client_documents_, f.qualified_lead,
+  f.reasons_for_lost_deal, f.deal_revival_, f.pain_point_1, f.pain_point_2, f.pain_point_3,
+  f.name_of_competitors, f.buyer_role,
+  f.looking_for_product__main_services_, f.product_needed__main_services_,
+  f.products_availed__main_services_,
+  f.ldu_upsell_, f.new_ldu_probability_to_buy_score AS ldu_probability_to_buy_score,
+  f.new_ldu_budget AS ldu_budget, f.new_ldu_needs AS ldu_needs,
+  f.new_ldu_needs_against_competitors AS ldu_needs_against_competitors,
+  f.new_ldu_timeline_against_need AS ldu_timeline_against_need,
+  f.partner_on_record, f.revenue_share,
+  f.hs_manual_forecast_category AS forecast_category,
+  ta.deal_tags, ta.tag_categories,
+  f.type_of_deal, f.executive_coverage AS Catalyst, f.notes, f.with_notes
+FROM filtered f
+LEFT JOIN shared.revops.deal_stage_mapping dsm ON f.pipeline_name=dsm.pipeline_name AND f.dealstage=dsm.dealstage
+LEFT JOIN federated_hubspot.dbo.DealPipelineStage dps ON CAST(f.dealstage AS STRING)=CAST(dps.DealStage AS STRING)
+LEFT JOIN federated_hubspot.dbo.owner coo ON CAST(f.co_owner AS STRING)=CAST(coo.hubspot_owner_id AS STRING)
+LEFT JOIN federated_hubspot.dbo.owner OW_TEAM ON f.hubspot_owner_id=OW_TEAM.hubspot_owner_id
+LEFT JOIN split_owner_agg soa ON f.DealId=soa.DealId
+LEFT JOIN federated_hubspot.dbo.owner OW_INBOUND ON CAST(f.inbound_lead AS STRING)=CAST(OW_INBOUND.hubspot_owner_id AS STRING)
+LEFT JOIN tags_agg ta ON f.DealId=ta.DealId;` }];
 
 (function renderSqlBlocks() {
   const c = document.getElementById('sql-blocks-container');
