@@ -1576,7 +1576,8 @@ DATABRICKS_TOKEN</div>
       <div class="bd-section">
         <div class="bd-section-title">Date Filter <span class="bd-col-tag">create_date / close_date</span></div>
 
-        <!-- Step 1: Scope -->
+        <!-- Q1: Data scope -->
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:8px;letter-spacing:.3px">Data scope</div>
         <div class="bd-date-mode-row">
           <label class="bd-date-mode-btn">
             <input type="radio" name="bd-date-scope" value="all" checked onchange="bdDateScope('all')">
@@ -1588,61 +1589,29 @@ DATABRICKS_TOKEN</div>
           </label>
         </div>
 
-        <!-- Step 2: How to filter (shown only when Specific is selected) -->
-        <div id="bd-date-type-row" style="display:none;margin-top:4px">
-          <div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:8px;letter-spacing:.3px">How do you want to filter?</div>
-          <div class="bd-date-mode-row" style="margin-bottom:12px">
-            <label class="bd-date-mode-btn">
-              <input type="radio" name="bd-date-type" value="range" onchange="bdDateMode('range')">
-              <span>Date Between</span>
-            </label>
-            <label class="bd-date-mode-btn">
-              <input type="radio" name="bd-date-type" value="monthly" onchange="bdDateMode('monthly')">
-              <span>Monthly</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Date Range inputs -->
-        <div id="bd-date-range" style="display:none" class="bd-date-row">
+        <!-- Date inputs (shown when Specific selected) -->
+        <div id="bd-date-inputs" style="display:none" class="bd-date-row">
           <div class="builder-field">
-            <label class="builder-label">From</label>
+            <label class="builder-label">Start Date</label>
             <input class="builder-input" id="bd-from" type="date">
           </div>
           <div class="builder-field">
-            <label class="builder-label">To</label>
+            <label class="builder-label">End Date</label>
             <input class="builder-input" id="bd-to" type="date">
           </div>
         </div>
 
-        <!-- Monthly selector -->
-        <div id="bd-date-monthly" style="display:none" class="bd-date-row">
-          <div class="builder-field">
-            <label class="builder-label">Month</label>
-            <select class="builder-input" id="bd-month" style="cursor:pointer">
-              <option value="01">January</option>
-              <option value="02">February</option>
-              <option value="03">March</option>
-              <option value="04">April</option>
-              <option value="05">May</option>
-              <option value="06">June</option>
-              <option value="07">July</option>
-              <option value="08">August</option>
-              <option value="09">September</option>
-              <option value="10">October</option>
-              <option value="11">November</option>
-              <option value="12">December</option>
-            </select>
-          </div>
-          <div class="builder-field">
-            <label class="builder-label">Year</label>
-            <select class="builder-input" id="bd-year" style="cursor:pointer">
-              <option value="2026">2026</option>
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
-              <option value="2023">2023</option>
-            </select>
-          </div>
+        <!-- Q2: Dashboard filter style (always shown) -->
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:16px;margin-bottom:8px;letter-spacing:.3px">Dashboard date filter style</div>
+        <div class="bd-date-mode-row">
+          <label class="bd-date-mode-btn">
+            <input type="radio" name="bd-dash-date-style" value="between">
+            <span>Date Between</span>
+          </label>
+          <label class="bd-date-mode-btn">
+            <input type="radio" name="bd-dash-date-style" value="monthly">
+            <span>Monthly Dropdown</span>
+          </label>
         </div>
       </div>
 
@@ -3304,19 +3273,18 @@ function _builderRenderChips() {
 
 
 function bdDateScope(scope) {
-  var typeRow = document.getElementById('bd-date-type-row');
-  if (scope === 'all') {
-    typeRow.style.display = 'none';
-    document.getElementById('bd-date-range').style.display = 'none';
-    document.getElementById('bd-date-monthly').style.display = 'none';
-    document.querySelectorAll('input[name="bd-date-type"]').forEach(function(r){ r.checked = false; });
+  var inp = document.getElementById('bd-date-inputs');
+  if (scope === 'specific') {
+    inp.style.display = 'flex';
+    // Default end date to Dec 31 of current year if empty
+    var toEl = document.getElementById('bd-to');
+    if (toEl && !toEl.value) {
+      var yr = new Date().getFullYear();
+      toEl.value = yr + '-12-31';
+    }
   } else {
-    typeRow.style.display = 'block';
+    inp.style.display = 'none';
   }
-}
-function bdDateMode(mode) {
-  document.getElementById('bd-date-range').style.display   = mode === 'range'   ? 'flex' : 'none';
-  document.getElementById('bd-date-monthly').style.display = mode === 'monthly' ? 'flex' : 'none';
 }
 function bdViewToggle(cb) {
   var card = cb.closest ? cb.closest('.bd-view-card') : cb.parentNode;
@@ -3344,23 +3312,13 @@ function _builderDateSQL(val,from,to) {
 function _builderRenderPrompt() {
   // ── Read all config fields ──
   var name     = (document.getElementById('bd-name')||{}).value || 'RevOps Dashboard';
-  // Date filter — two-step: scope then type
-  var _dateScope = (document.querySelector('input[name="bd-date-scope"]:checked')||{}).value || 'all';
-  var _dateType  = (document.querySelector('input[name="bd-date-type"]:checked')||{}).value || '';
+  // Date filter
+  var _dateScope    = (document.querySelector('input[name="bd-date-scope"]:checked')||{}).value || 'all';
+  var _dashDateStyle= (document.querySelector('input[name="bd-dash-date-style"]:checked')||{}).value || '';
   var fromDate = '', toDate = '';
   if (_dateScope === 'specific') {
-    if (_dateType === 'range') {
-      fromDate = (document.getElementById('bd-from')||{}).value || '';
-      toDate   = (document.getElementById('bd-to')||{}).value || '';
-    } else if (_dateType === 'monthly') {
-      var _mo = (document.getElementById('bd-month')||{}).value || '';
-      var _yr = (document.getElementById('bd-year')||{}).value || '';
-      if (_mo && _yr) {
-        var _lastDay = new Date(_yr, parseInt(_mo), 0).getDate();
-        fromDate = _yr + '-' + _mo + '-01';
-        toDate   = _yr + '-' + _mo + '-' + _lastDay;
-      }
-    }
+    fromDate = (document.getElementById('bd-from')||{}).value || '';
+    toDate   = (document.getElementById('bd-to')||{}).value || '';
   }
   // _dateScope === 'all' -> fromDate and toDate stay empty (no date filter)
   function getChecked(groupId) {
@@ -3428,8 +3386,9 @@ function _builderRenderPrompt() {
   var prompt = 'You are building a RevOps dashboard called "' + name + '" for Sprout Solutions using Databricks SQL (shared.revops schema).\n\n'
     + '## Dashboard Configuration\n'
     + '- Dashboard Name: ' + name + '\n'
-    + (fromDate ? '- Date From: ' + fromDate + '\n' : '')
-    + (toDate   ? '- Date To:   ' + toDate   + '\n' : '')
+    + (_dateScope === 'specific' && fromDate ? '- Date From: ' + fromDate + '\n' : '')
+    + (_dateScope === 'specific' && toDate   ? '- Date To:   ' + toDate   + '\n' : '')
+    + (_dashDateStyle ? '- Dashboard Date Filter Style: ' + (_dashDateStyle === 'between' ? 'Date Between (start/end date pickers)' : 'Monthly Dropdown (month + year)') + '\n' : '')
     + (pipelines.length  ? '- Pipelines: '    + pipelines.join(', ')  + '\n' : '- Pipelines: All\n')
     + (sources.length    ? '- Dept Source: '  + sources.join(', ')    + '\n' : '')
     + (subFilters.length ? '- Sub Filters to add to dashboard: ' + subFilters.join(', ') + '\n' : '')
