@@ -364,6 +364,61 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
 .sync-bar.show{display:flex}
 .sync-bar.err{background:rgba(255,118,117,.08);border-color:rgba(255,118,117,.25);color:#FF7675}
 .sync-bar.ok{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25);color:#10B981}
+
+/* ── DASHBOARD BUILDER ── */
+.builder-hero{background:linear-gradient(135deg,#060c14 0%,#0d1f2d 100%);padding:24px 28px;color:#fff;border-bottom:1px solid rgba(255,255,255,.06)}
+.builder-hero h1{font-size:20px;font-weight:700;margin-bottom:6px}
+.builder-hero p{color:rgba(255,255,255,.45);font-size:13px;line-height:1.6;max-width:700px}
+.builder-steps-indicator{display:flex;align-items:center;padding:20px 28px 0;gap:0;background:#060c14;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:16px}
+.builder-step-dot{display:flex;align-items:center;gap:8px;position:relative}
+.bsi-num{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .25s;flex-shrink:0}
+.bsi-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.35);transition:color .25s;white-space:nowrap}
+.builder-step-dot.active .bsi-num{background:#1DB954;border-color:#1DB954;color:#fff;box-shadow:0 0 12px rgba(29,185,84,.4)}
+.builder-step-dot.active .bsi-label{color:#1DB954}
+.builder-step-dot.done .bsi-num{background:rgba(29,185,84,.25);border-color:rgba(29,185,84,.5);color:#1DB954}
+.builder-step-dot.done .bsi-label{color:rgba(29,185,84,.7)}
+.builder-step-line{flex:1;height:2px;background:rgba(255,255,255,.08);margin:0 12px;transition:background .25s;min-width:32px}
+.builder-step-line.done{background:rgba(29,185,84,.4)}
+.builder-step-panel{padding:0}
+.builder-panel-header{padding:20px 28px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.builder-panel-title{font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:4px}
+.builder-panel-sub{font-size:12px;color:rgba(255,255,255,.4);line-height:1.6;max-width:600px}
+.builder-selected-count{font-size:13px;font-weight:700;color:#1DB954;background:rgba(29,185,84,.1);border:1px solid rgba(29,185,84,.25);padding:6px 14px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.builder-controls{padding:14px 24px;background:#060c14;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.builder-cat-filters{display:flex;gap:6px;flex-wrap:wrap}
+.builder-metrics-grid{padding:16px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.builder-mcard{background:rgba(255,255,255,.03);border-radius:10px;border:1.5px solid rgba(255,255,255,.07);padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.builder-mcard:hover{border-color:rgba(29,185,84,.3);background:rgba(29,185,84,.04)}
+.builder-mcard.selected{border-color:#1DB954;background:rgba(29,185,84,.08);box-shadow:0 0 0 1px rgba(29,185,84,.2),0 4px 16px rgba(29,185,84,.1)}
+.builder-mcard-check{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:4px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:11px;color:transparent}
+.builder-mcard.selected .builder-mcard-check{background:#1DB954;border-color:#1DB954;color:#fff}
+.builder-mcard-name{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:5px;padding-right:24px;line-height:1.3}
+.builder-mcard-cat{display:inline-block;margin-bottom:5px}
+.builder-mcard-def{font-size:11px;color:rgba(255,255,255,.4);line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.builder-footer{padding:16px 24px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;background:#060c14;position:sticky;bottom:0;box-shadow:0 -2px 12px rgba(0,0,0,.3)}
+.builder-btn-next{background:linear-gradient(135deg,#1DB954,#18A348);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Rubik','Bahnschrift Light SemiCondensed',Arial,sans-serif;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.builder-btn-next:hover:not(:disabled){background:linear-gradient(135deg,#25d45f,#1DB954);transform:translateY(-1px);box-shadow:0 5px 0 rgba(0,0,0,.4),0 8px 20px rgba(29,185,84,.2)}
+.builder-btn-next:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.builder-btn-back{background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Rubik','Bahnschrift Light SemiCondensed',Arial,sans-serif}
+.builder-btn-back:hover{background:rgba(255,255,255,.1);color:#e2e8f0}
+.builder-config-body{padding:20px 24px}
+.builder-form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:20px}
+.builder-field{display:flex;flex-direction:column;gap:5px}
+.builder-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:rgba(255,255,255,.35)}
+.builder-input{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:#e2e8f0;font-size:13px;outline:none;transition:border-color .2s;font-family:'Rubik','Bahnschrift Light SemiCondensed',Arial,sans-serif}
+.builder-input:focus{border-color:#1DB954}
+.builder-input::placeholder{color:rgba(255,255,255,.25)}
+.builder-select{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:#e2e8f0;font-size:13px;outline:none;transition:border-color .2s;font-family:'Rubik','Bahnschrift Light SemiCondensed',Arial,sans-serif;cursor:pointer}
+.builder-select:focus{border-color:#1DB954}
+.builder-select option{background:#0d1628;color:#e2e8f0}
+.builder-selected-summary{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px}
+.builder-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:24px}
+.builder-chip{background:rgba(29,185,84,.12);border:1px solid rgba(29,185,84,.25);color:#6EE7B7;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.builder-prompt-textarea{width:100%;height:420px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:16px;font-family:"Courier New",monospace;font-size:11px;color:#6EE7B7;line-height:1.65;resize:vertical;outline:none}
+.builder-btn-copy{background:linear-gradient(135deg,#1DB954,#18A348);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Rubik','Bahnschrift Light SemiCondensed',Arial,sans-serif;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.builder-btn-copy:hover{transform:translateY(-1px);box-shadow:0 5px 0 rgba(0,0,0,.4),0 8px 20px rgba(29,185,84,.2)}
+.builder-tip-box{background:rgba(29,185,84,.07);border-left:3px solid #1DB954;border-radius:0 8px 8px 0;padding:12px 16px;font-size:12px;color:rgba(255,255,255,.65);line-height:1.65;margin-top:16px}
+.builder-tip-box strong{color:#1DB954}
 </style>
 </head>
 <body>
@@ -407,6 +462,7 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
     <div class="sidebar-tab" id="tab-dp" onclick="switchTab('dp')">📖 DataPedia</div>
     <div class="sidebar-tab" id="tab-dash" onclick="switchTab('dash')">📊 Dashboard Plan</div>
     <div class="sidebar-tab" id="tab-dashboards" onclick="switchTab('dashboards')">📱 Dashboards</div>
+    <div class="sidebar-tab" id="tab-builder" onclick="switchTab('builder')">🏗️ Dashboard Builder</div>
   </div>
   <div class="content-area">
 
@@ -450,6 +506,13 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
         <div class="home-card-title">Team Dashboards</div>
         <div class="home-card-desc">Browse all live dashboards built by the team — Channels, Marketing, Pipeline, and more. Click any card to open the dashboard directly.</div>
         <div class="home-card-arrow">BROWSE DASHBOARDS →</div>
+      </div>
+
+      <div class="home-card" onclick="switchTab('builder')">
+        <div class="home-card-icon">🏗️</div>
+        <div class="home-card-title">Dashboard Builder</div>
+        <div class="home-card-desc">Select metrics and generate a ready-to-use Claude prompt</div>
+        <div class="home-card-arrow">BUILD DASHBOARD →</div>
       </div>
     </div>
 
@@ -1340,6 +1403,157 @@ DATABRICKS_TOKEN</div>
   <div class="dg-grid" id="dg-grid"></div>
 </div>
 
+<!-- PART 5 — DASHBOARD BUILDER -->
+<div class="section" id="section-builder" style="display:none">
+  <div class="builder-hero">
+    <h1>🏗️ Dashboard Builder</h1>
+    <p>Select the metrics you need, configure your dashboard settings, and get a ready-to-use Claude prompt with exact DataPedia definitions, SQL templates, and filters.</p>
+  </div>
+
+  <!-- Step Indicator -->
+  <div class="builder-steps-indicator">
+    <div class="builder-step-dot active" id="bsi-1">
+      <span class="bsi-num">1</span>
+      <span class="bsi-label">Pick Metrics</span>
+    </div>
+    <div class="builder-step-line" id="bsl-1"></div>
+    <div class="builder-step-dot" id="bsi-2">
+      <span class="bsi-num">2</span>
+      <span class="bsi-label">Configure</span>
+    </div>
+    <div class="builder-step-line" id="bsl-2"></div>
+    <div class="builder-step-dot" id="bsi-3">
+      <span class="bsi-num">3</span>
+      <span class="bsi-label">Get Prompt</span>
+    </div>
+  </div>
+
+  <!-- Step 1: Pick Metrics -->
+  <div class="builder-step-panel active" id="builder-step-1">
+    <div class="builder-panel-header">
+      <div>
+        <div class="builder-panel-title">Step 1 of 3 — Select Metrics</div>
+        <div class="builder-panel-sub">Choose the metrics to include in your dashboard. Selected metrics will be included with their exact definitions, formulas, and SQL logic.</div>
+      </div>
+      <div class="builder-selected-count" id="builder-selected-count">0 metrics selected</div>
+    </div>
+
+    <div class="builder-controls">
+      <div class="search-box" style="max-width:320px">
+        <span class="sicon">🔍</span>
+        <input type="text" id="builder-search" placeholder="Search metrics..." oninput="builderFilterMetrics()">
+      </div>
+      <div class="builder-cat-filters" id="builder-cat-filters"></div>
+    </div>
+
+    <div class="builder-metrics-grid" id="builder-metrics-grid"></div>
+
+    <div class="builder-footer">
+      <div></div>
+      <button class="builder-btn-next" id="builder-next-1" onclick="builderGoStep(2)" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Configure -->
+  <div class="builder-step-panel" id="builder-step-2" style="display:none">
+    <div class="builder-panel-header">
+      <div>
+        <div class="builder-panel-title">Step 2 of 3 — Configure Your Dashboard</div>
+        <div class="builder-panel-sub">Set the name, date range, pipeline, segment, and view type for your dashboard.</div>
+      </div>
+    </div>
+
+    <div class="builder-config-body">
+      <div class="builder-form-grid">
+        <div class="builder-field">
+          <label class="builder-label">Dashboard Name</label>
+          <input class="builder-input" id="bd-name" type="text" placeholder="e.g. Marketing Funnel Dashboard">
+        </div>
+        <div class="builder-field">
+          <label class="builder-label">Date Range</label>
+          <select class="builder-select" id="bd-daterange" onchange="builderToggleCustomDates()">
+            <option value="MTD">MTD (Month to Date)</option>
+            <option value="QTD">QTD (Quarter to Date)</option>
+            <option value="YTD">YTD (Year to Date)</option>
+            <option value="Last 30 Days">Last 30 Days</option>
+            <option value="Last 90 Days">Last 90 Days</option>
+            <option value="Custom">Custom Range</option>
+          </select>
+        </div>
+        <div class="builder-field builder-custom-dates" id="bd-custom-dates" style="display:none">
+          <label class="builder-label">From Date</label>
+          <input class="builder-input" id="bd-from" type="date">
+        </div>
+        <div class="builder-field builder-custom-dates" id="bd-custom-dates-to" style="display:none">
+          <label class="builder-label">To Date</label>
+          <input class="builder-input" id="bd-to" type="date">
+        </div>
+        <div class="builder-field">
+          <label class="builder-label">Pipeline</label>
+          <select class="builder-select" id="bd-pipeline">
+            <option value="All Pipelines">All Pipelines</option>
+            <option value="Sales Pipeline">Sales Pipeline</option>
+            <option value="PH Upsell Pipeline">PH Upsell Pipeline</option>
+            <option value="Unified Channel Pipeline">Unified Channel Pipeline</option>
+            <option value="TH Sales Pipeline">TH Sales Pipeline</option>
+          </select>
+        </div>
+        <div class="builder-field">
+          <label class="builder-label">Segment</label>
+          <select class="builder-select" id="bd-segment">
+            <option value="All Segments">All Segments</option>
+            <option value="SME">SME</option>
+            <option value="ENT">ENT</option>
+            <option value="Channels">Channels</option>
+          </select>
+        </div>
+        <div class="builder-field">
+          <label class="builder-label">View Type</label>
+          <select class="builder-select" id="bd-viewtype">
+            <option value="KPI Cards + Charts">KPI Cards + Charts</option>
+            <option value="KPI Cards Only">KPI Cards Only</option>
+            <option value="Trend Charts Only">Trend Charts Only</option>
+            <option value="Full Report">Full Report</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="builder-selected-summary">
+        <div class="builder-label" style="margin-bottom:8px">Selected Metrics</div>
+        <div class="builder-chips" id="builder-chips"></div>
+      </div>
+    </div>
+
+    <div class="builder-footer">
+      <button class="builder-btn-back" onclick="builderGoStep(1)">← Back</button>
+      <button class="builder-btn-next" onclick="builderGoStep(3)">Generate Prompt →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Generated Prompt -->
+  <div class="builder-step-panel" id="builder-step-3" style="display:none">
+    <div class="builder-panel-header">
+      <div>
+        <div class="builder-panel-title">Step 3 of 3 — Your Claude Prompt</div>
+        <div class="builder-panel-sub">Copy this prompt and paste it into Claude. It includes the exact metric definitions, formulas, and filters for each selected metric.</div>
+      </div>
+    </div>
+
+    <div style="padding:0 24px 16px">
+      <textarea class="builder-prompt-textarea" id="builder-prompt-output" readonly></textarea>
+
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="builder-btn-copy" id="builder-copy-btn" onclick="builderCopyPrompt()">📋 Copy Prompt</button>
+        <button class="builder-btn-back" onclick="builderGoStep(1)">🔄 Start Over</button>
+      </div>
+
+      <div class="builder-tip-box">
+        💡 <strong>Tip:</strong> Paste this prompt into Claude. It includes the exact DataPedia definitions, SQL templates, and filters for each metric — Claude will build the dashboard correctly on the first try.
+      </div>
+    </div>
+  </div>
+</div><!-- /section-builder -->
+
   </div><!-- /content-area -->
 </div><!-- /app-layout -->
 
@@ -1547,6 +1761,8 @@ function switchTab(t) {
   // Hide sidebar on Home, show on all other sections
   const layout = document.querySelector('.app-layout');
   if (layout) layout.classList.toggle('home-mode', t === 'home');
+  // Initialize Dashboard Builder on first visit
+  if (t === 'builder' && window._builderInit) window._builderInit();
 }
 
 // ── DATABASE ──
@@ -2749,6 +2965,294 @@ renderDashboards();
     homeObs.observe(sec, {attributes:true, attributeFilter:['class','style']});
     if (sec.classList.contains('active')) start();
   }
+})();
+
+// ── DASHBOARD BUILDER ──
+(function() {
+  const BUILDER_CATS = ['All', 'Finance', 'Funnel', 'Revenue', 'Sales_Productivity', 'Marketing_Efficiency', 'Product_Performance'];
+  const BUILDER_CAT_LABELS = {
+    All: 'All',
+    Finance: 'Finance',
+    Funnel: 'Funnel',
+    Revenue: 'Revenue',
+    Sales_Productivity: 'Sales',
+    Marketing_Efficiency: 'Marketing',
+    Product_Performance: 'Product'
+  };
+
+  let builderSelectedIds = new Set();
+  let builderActiveCat = '';
+  let builderSearchVal = '';
+  let builderCurrentStep = 1;
+
+  function getMetrics() {
+    return window._LIVE_METRICS || METRICS;
+  }
+
+  // Render category filter buttons
+  function initBuilderCatFilters() {
+    const wrap = document.getElementById('builder-cat-filters');
+    if (!wrap) return;
+    wrap.innerHTML = BUILDER_CATS.map(c => {
+      const label = BUILDER_CAT_LABELS[c] || c;
+      const isAll = c === 'All';
+      return `<button class="fb${isAll ? ' active' : ''}" data-bcat="${isAll ? '' : c}" onclick="window._builderSetCat(this)">${label}</button>`;
+    }).join('');
+  }
+
+  window._builderSetCat = function(el) {
+    builderActiveCat = el.dataset.bcat || '';
+    document.querySelectorAll('#builder-cat-filters .fb').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    builderFilterMetrics();
+  };
+
+  function builderFilterMetrics() {
+    builderSearchVal = (document.getElementById('builder-search') && document.getElementById('builder-search').value || '').toLowerCase();
+    const metrics = getMetrics().filter(m => {
+      const matchCat = !builderActiveCat || m.category === builderActiveCat;
+      const matchSearch = !builderSearchVal || m.name.toLowerCase().includes(builderSearchVal) ||
+        (m.definition || '').toLowerCase().includes(builderSearchVal) ||
+        (m.category || '').toLowerCase().includes(builderSearchVal);
+      return matchCat && matchSearch;
+    });
+    renderBuilderMetrics(metrics);
+  }
+  window.builderFilterMetrics = builderFilterMetrics;
+
+  function renderBuilderMetrics(metrics) {
+    const grid = document.getElementById('builder-metrics-grid');
+    if (!grid) return;
+    if (!metrics.length) {
+      grid.innerHTML = '<div class="empty-state"><div style="font-size:44px">🔍</div><h3>No metrics found</h3><p>Try a different search or filter</p></div>';
+      return;
+    }
+    grid.innerHTML = metrics.map((m, i) => {
+      const sel = builderSelectedIds.has(m.name);
+      const catLabel = CL[m.category] || m.category || '';
+      const catColor = DC[m.category] || '#636';
+      return `<div class="builder-mcard${sel ? ' selected' : ''}" onclick="window._builderToggleMetric(${JSON.stringify(m.name)})">
+        <div class="builder-mcard-check">${sel ? '✓' : ''}</div>
+        <div class="builder-mcard-name">${m.name}</div>
+        <div class="builder-mcard-cat"><span class="cat-badge cat-${m.category}">${catLabel}</span></div>
+        <div class="builder-mcard-def" title="${(m.definition || '').replace(/"/g,'&quot;')}">${m.definition || ''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  window._builderToggleMetric = function(name) {
+    if (builderSelectedIds.has(name)) {
+      builderSelectedIds.delete(name);
+    } else {
+      builderSelectedIds.add(name);
+    }
+    updateBuilderCount();
+    builderFilterMetrics();
+  };
+
+  function updateBuilderCount() {
+    const count = builderSelectedIds.size;
+    const el = document.getElementById('builder-selected-count');
+    if (el) el.textContent = count + ' metric' + (count !== 1 ? 's' : '') + ' selected';
+    const btn = document.getElementById('builder-next-1');
+    if (btn) btn.disabled = count === 0;
+  }
+
+  function builderGoStep(n) {
+    if (n === 2) {
+      if (builderSelectedIds.size === 0) return;
+      renderBuilderChips();
+    }
+    if (n === 3) {
+      renderBuilderPrompt();
+    }
+    if (n === 1) {
+      // reset to step 1 (start over)
+      builderSelectedIds = new Set();
+      updateBuilderCount();
+      builderFilterMetrics();
+    }
+
+    builderCurrentStep = n;
+
+    // Update step panels
+    for (let i = 1; i <= 3; i++) {
+      const panel = document.getElementById('builder-step-' + i);
+      if (panel) panel.style.display = i === n ? 'block' : 'none';
+    }
+
+    // Update step indicator
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById('bsi-' + i);
+      if (!dot) continue;
+      dot.classList.remove('active', 'done');
+      if (i === n) dot.classList.add('active');
+      else if (i < n) dot.classList.add('done');
+    }
+    for (let i = 1; i <= 2; i++) {
+      const line = document.getElementById('bsl-' + i);
+      if (line) {
+        line.classList.toggle('done', i < n);
+      }
+    }
+
+    // Scroll to top of section
+    const sec = document.getElementById('section-builder');
+    if (sec) sec.scrollTop = 0;
+    const content = document.querySelector('.content-area');
+    if (content) content.scrollTop = 0;
+  }
+  window.builderGoStep = builderGoStep;
+
+  function renderBuilderChips() {
+    const wrap = document.getElementById('builder-chips');
+    if (!wrap) return;
+    wrap.innerHTML = [...builderSelectedIds].map(name =>
+      `<span class="builder-chip">${name}</span>`
+    ).join('');
+  }
+
+  function builderToggleCustomDates() {
+    const val = document.getElementById('bd-daterange') && document.getElementById('bd-daterange').value;
+    const show = val === 'Custom';
+    ['bd-custom-dates', 'bd-custom-dates-to'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = show ? 'flex' : 'none';
+    });
+  }
+  window.builderToggleCustomDates = builderToggleCustomDates;
+
+  function getDateFilterSQL(range, from, to) {
+    switch (range) {
+      case 'MTD':        return "create_date >= DATE_TRUNC('month', CURRENT_DATE()) AND create_date <= CURRENT_DATE()";
+      case 'QTD':        return "create_date >= DATE_TRUNC('quarter', CURRENT_DATE()) AND create_date <= CURRENT_DATE()";
+      case 'YTD':        return "YEAR(create_date) = YEAR(CURRENT_DATE())";
+      case 'Last 30 Days': return "create_date >= CURRENT_DATE() - INTERVAL 30 DAYS";
+      case 'Last 90 Days': return "create_date >= CURRENT_DATE() - INTERVAL 90 DAYS";
+      case 'Custom':     return `create_date >= '${from || 'YYYY-MM-DD'}' AND create_date <= '${to || 'YYYY-MM-DD'}'`;
+      default:           return "create_date >= DATE_TRUNC('month', CURRENT_DATE()) AND create_date <= CURRENT_DATE()";
+    }
+  }
+
+  function getPipelineFilter(pipeline) {
+    if (pipeline === 'All Pipelines') return '-- No pipeline filter (all pipelines)';
+    return `AND pipeline_name = '${pipeline}'`;
+  }
+
+  function getSegmentFilter(segment) {
+    if (segment === 'All Segments') return '-- No segment filter (all segments)';
+    return `AND CASE WHEN UPPER(segment) = 'MICRO' THEN 'SME' ELSE segment END = '${segment}'`;
+  }
+
+  function renderBuilderPrompt() {
+    const name      = (document.getElementById('bd-name') && document.getElementById('bd-name').value.trim()) || 'RevOps Dashboard';
+    const dateRange = (document.getElementById('bd-daterange') && document.getElementById('bd-daterange').value) || 'MTD';
+    const from      = (document.getElementById('bd-from') && document.getElementById('bd-from').value) || '';
+    const to        = (document.getElementById('bd-to') && document.getElementById('bd-to').value) || '';
+    const pipeline  = (document.getElementById('bd-pipeline') && document.getElementById('bd-pipeline').value) || 'All Pipelines';
+    const segment   = (document.getElementById('bd-segment') && document.getElementById('bd-segment').value) || 'All Segments';
+    const viewType  = (document.getElementById('bd-viewtype') && document.getElementById('bd-viewtype').value) || 'KPI Cards + Charts';
+
+    const allMetrics = getMetrics();
+    const selectedMetrics = [...builderSelectedIds].map(name => allMetrics.find(m => m.name === name)).filter(Boolean);
+
+    const metricBlocks = selectedMetrics.map(m => {
+      return `### ${m.name}
+- Definition: ${m.definition || '(see DataPedia)'}
+- Business Question: ${m.business_question || ''}
+- Formula: ${m.formula || ''}
+- SQL: ${m.sql || '(use shared.revops silver/gold tables per formula above)'}
+- Filters: ${m.filters || ''}
+- Exclusions: ${m.exclusions || ''}`;
+    }).join('\n\n');
+
+    const dateSQL = getDateFilterSQL(dateRange, from, to);
+    const pipelineFilter = getPipelineFilter(pipeline);
+    const segmentFilter = getSegmentFilter(segment);
+
+    const prompt = `You are building a ${viewType} RevOps dashboard called "${name}" for Sprout Solutions using Databricks SQL (shared.revops schema).
+
+## Dashboard Configuration
+- Date Range: ${dateRange}${dateRange === 'Custom' ? ` (${from} to ${to})` : ''}
+- Pipeline: ${pipeline}
+- Segment: ${segment}
+- View Type: ${viewType}
+
+## Metrics to Include
+${metricBlocks}
+
+## Instructions
+1. Use the exact SQL and filters provided above for each metric — do not modify the business logic
+2. All queries use Databricks SQL syntax against the shared.revops schema
+3. Apply these global filters to all queries:
+   - Pipeline: ${pipelineFilter}
+   - Segment: ${segmentFilter}
+   - Date Range: WHERE ${dateSQL}
+4. Exclude renewals: AND deal_type NOT IN ('Renewal','Upsell - Renewal') AND LOWER(deal_name) NOT LIKE '%renewal%'
+5. Build the dashboard as a single self-contained HTML file with:
+   - Dark theme (#030712 background, #1DB954 accent)
+   - Responsive grid layout
+   - Clean metric cards with current value + trend where possible
+   - Professional, executive-level design
+
+## Date Filter SQL
+WHERE ${dateSQL}
+
+## Data Platform
+USE CATALOG shared;
+USE SCHEMA revops;
+
+Gold tables (use first):
+- shared.revops.gold_monthly_exec_summary — pre-aggregated monthly KPIs
+- shared.revops.gold_targets — monthly targets
+- shared.revops.datapedia_approved — approved metric definitions
+
+Silver tables (drilldown only):
+- shared.revops.silver_deals — 1 row per deal
+- shared.revops.silver_line_items — product-level MRR
+- shared.revops.silver_company — company attributes
+
+## Core Data Rules (always apply)
+1. EXCLUDE RENEWALS: WHERE LOWER(COALESCE(deal_name,'')) NOT LIKE '%renewal%'
+2. SEGMENT: CASE WHEN UPPER(segment) = 'MICRO' THEN 'SME' ELSE segment END
+3. Always use department_source_clean (NOT raw department_source)
+4. Always use DISTINCT deal_id for counts
+5. Date basis: Funnel/Lead counts → create_date | Won/Revenue → close_date | Pipeline (TMRR) → projected_close_date`;
+
+    const textarea = document.getElementById('builder-prompt-output');
+    if (textarea) textarea.value = prompt;
+  }
+
+  function builderCopyPrompt() {
+    const textarea = document.getElementById('builder-prompt-output');
+    if (!textarea) return;
+    navigator.clipboard.writeText(textarea.value).then(() => {
+      const btn = document.getElementById('builder-copy-btn');
+      if (btn) {
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => btn.textContent = '📋 Copy Prompt', 2000);
+      }
+    });
+  }
+  window.builderCopyPrompt = builderCopyPrompt;
+
+  // Initialize builder when first shown
+  function initBuilder() {
+    initBuilderCatFilters();
+    builderFilterMetrics();
+    updateBuilderCount();
+  }
+
+  // Hook into switchTab to init builder on first visit
+  const _origSwitchTab = window.switchTab;
+  // We patch at the bottom after switchTab is defined, using a flag
+  window._builderInited = false;
+  window._builderInit = function() {
+    if (!window._builderInited) {
+      window._builderInited = true;
+      initBuilder();
+    }
+  };
 })();
 
 // ── 3D CARD TILT ──
