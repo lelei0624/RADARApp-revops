@@ -1761,8 +1761,8 @@ function switchTab(t) {
   // Hide sidebar on Home, show on all other sections
   const layout = document.querySelector('.app-layout');
   if (layout) layout.classList.toggle('home-mode', t === 'home');
-  // Initialize Dashboard Builder
-  if (t === 'builder') { setTimeout(function(){ if(typeof _builderInitAll==='function') _builderInitAll(); }, 50); }
+  // Initialize Dashboard Builder (lazy fallback if DOMContentLoaded already fired)
+  if (t === 'builder') _builderInitAll();
 }
 
 // ── DATABASE ──
@@ -3167,11 +3167,9 @@ window._builderInit         = _builderInitAll;
 window._builderToggleMetric = builderToggleMetric;
 window._builderSetCat       = builderSetCat;
 
-
-// Dashboard Builder: init fallback on tab activation
-document.addEventListener('click', function(e) {
-  var tab = e.target.closest('[onclick*="switchTab(\'builder\')"]');
-  if (tab) setTimeout(function(){ _builderInitAll(); }, 100);
+// Initialize builder immediately on page load so grid is pre-populated
+document.addEventListener('DOMContentLoaded', function() {
+  _builderInitAll();
 });
 
 // ── 3D CARD TILT ──
