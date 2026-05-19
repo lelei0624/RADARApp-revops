@@ -3371,7 +3371,7 @@ function _builderRenderPromptInner() {
     if (cb && cb.checked) { var n = row.getAttribute('data-n'); if (n) _selectedNames.push(n); }
   });
   var selected = _getBuilderMetrics().filter(function(m){
-    return _selectedNames.indexOf(m.name) >= 0 || _builderSelectedIds.has(m.name);
+    return _selectedNames.indexOf(m.name) >= 0;
   });
 
   var mBlock = selected.map(function(m){
