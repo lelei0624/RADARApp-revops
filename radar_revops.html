@@ -3986,7 +3986,7 @@ function _builderRenderPromptInner() {
     + 'FILTERS IN DASHBOARD:\n'
     + '  • Date filter style: ' + _dateStyleLine + '\n'
     + (_dateScope==='specific' && fromDate ? '  • Default date range: ' + fromDate + ' to ' + (toDate||'') + '\n' : '  • Default: All Data\n')
-    + (subFilters.length ? '  • Add these as interactive filter controls: ' + subFilters.join(', ') + '\n' : '')
+    + (subFilters.length ? '  • Add these as dropdown slicer controls (NOT tabs — use <select> dropdowns or styled pill slicers the user can click to filter the whole dashboard): ' + subFilters.join(', ') + '\n' : '')
     + '\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     + '🧱 DATA PLATFORM (shared.revops)\n'
@@ -4092,7 +4092,7 @@ function _builderRenderPromptInner() {
     + 'KPI Scorecards (each card: current value + LY comparison + % change arrow):\n'
     + '  ' + _kpiList + '\n\n'
     + 'Views to build:\n' + viewList + '\n\n'
-    + (subFilters.length ? 'Interactive filter dimensions to add to the dashboard UI:\n  ' + subFilters.join(', ') + '\n\n' : '')
+    + (subFilters.length ? 'Interactive slicer filters to add to the dashboard UI (implement as dropdown <select> or styled pill slicers — NOT as tabs):\n  ' + subFilters.join(', ') + '\n\n' : '')
     + 'Design: Dark theme (#030712 bg, #1DB954 accent, white text), Chart.js charts, responsive grid, executive-level.\n'
     + 'Include "Last refreshed" timestamp from json.refreshed_at in the header.\n\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
@@ -4116,7 +4116,7 @@ function _builderRenderPromptInner() {
     + (sources.length ? '• Dept Source filter:    ' + sources.join(', ') + '\n' : '')
     + '• KPIs to show:           ' + _kpiList + '\n'
     + '• Views to include:       ' + _viewListFill + '\n'
-    + (subFilters.length ? '• Filter dimensions:     ' + subFilters.join(', ') + '\n' : '')
+    + (subFilters.length ? '• Filter slicers (dropdowns, not tabs): ' + subFilters.join(', ') + '\n' : '')
     + '\n'
     + (notes ? '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     + '📝 ADDITIONAL NOTES / SPECIAL INSTRUCTIONS\n'
