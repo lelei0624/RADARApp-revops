@@ -386,15 +386,16 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
 .builder-selected-count{font-size:13px;font-weight:700;color:#1DB954;background:rgba(29,185,84,.1);border:1px solid rgba(29,185,84,.25);padding:6px 14px;border-radius:20px;white-space:nowrap;flex-shrink:0}
 .builder-controls{padding:14px 24px;background:#060c14;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,.4)}
 .builder-cat-filters{display:flex;gap:6px;flex-wrap:wrap}
-.builder-metrics-grid{padding:16px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-.builder-mcard{background:rgba(255,255,255,.03);border-radius:10px;border:1.5px solid rgba(255,255,255,.07);padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.builder-mcard:hover{border-color:rgba(29,185,84,.3);background:rgba(29,185,84,.04)}
-.builder-mcard.selected{border-color:#1DB954;background:rgba(29,185,84,.08);box-shadow:0 0 0 1px rgba(29,185,84,.2),0 4px 16px rgba(29,185,84,.1)}
-.builder-mcard-check{position:absolute;top:10px;right:10px}
-.builder-mcard-check input[type=checkbox]{width:16px;height:16px;accent-color:#1DB954;cursor:pointer;border-radius:4px}
-.builder-mcard-name{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:5px;padding-right:24px;line-height:1.3}
-.builder-mcard-cat{display:inline-block;margin-bottom:5px}
-.builder-mcard-def{font-size:11px;color:rgba(255,255,255,.4);line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.builder-metrics-grid{padding:8px 24px 16px;display:flex;flex-direction:column;gap:2px}
+.builder-mrow{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background .12s;border:1px solid transparent}
+.builder-mrow:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.06)}
+.builder-mrow.selected{background:rgba(29,185,84,.07);border-color:rgba(29,185,84,.2)}
+.builder-mrow input[type=checkbox]{width:16px;height:16px;accent-color:#1DB954;cursor:pointer;flex-shrink:0;margin-top:2px}
+.builder-mrow-info{flex:1;min-width:0}
+.builder-mrow-name{font-size:13px;font-weight:700;color:#e2e8f0;line-height:1.3}
+.builder-mrow-meta{display:flex;align-items:center;gap:8px;margin-top:3px}
+.builder-mrow-cat{font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:rgba(29,185,84,.15);color:#1DB954;border:1px solid rgba(29,185,84,.3)}
+.builder-mrow-def{font-size:11px;color:rgba(255,255,255,.4);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:600px}
 .builder-footer{padding:16px 24px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;background:#060c14;position:sticky;bottom:0;box-shadow:0 -2px 12px rgba(0,0,0,.3)}
 .builder-btn-next{background:linear-gradient(135deg,#1DB954,#18A348);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Rubik','Bahnschrift Light SemiCondensed',Arial,sans-serif;box-shadow:0 3px 0 rgba(0,0,0,.4)}
 .builder-btn-next:hover:not(:disabled){background:linear-gradient(135deg,#25d45f,#1DB954);transform:translateY(-1px);box-shadow:0 5px 0 rgba(0,0,0,.4),0 8px 20px rgba(29,185,84,.2)}
@@ -3004,11 +3005,15 @@ function _builderRenderMetrics(metrics) {
     var sel = _builderSelectedIds.has(m.name);
     var catLabel = BUILDER_CAT_LABELS[m.category] || m.category || '';
     var safeN = JSON.stringify(m.name);
-    return '<div class="builder-mcard' + (sel?' selected':'') + '" onclick="builderToggleMetric(' + safeN + ')">' +
-      '<div class="builder-mcard-check"><input type="checkbox"' + (sel?' checked':'') + ' onclick="event.stopPropagation();builderToggleMetric(' + safeN + ')"></div>' +
-      '<div class="builder-mcard-name">' + (m.name||'') + '</div>' +
-      '<div class="builder-mcard-cat"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(29,185,84,.15);color:#1DB954;border:1px solid rgba(29,185,84,.3)">' + catLabel + '</span></div>' +
-      '<div class="builder-mcard-def">' + (m.definition||'') + '</div>' +
+    return '<div class="builder-mrow' + (sel?' selected':'') + '" onclick="builderToggleMetric(' + safeN + ')">' +
+      '<input type="checkbox"' + (sel?' checked':'') + ' onclick="event.stopPropagation();builderToggleMetric(' + safeN + ')">' +
+      '<div class="builder-mrow-info">' +
+        '<div class="builder-mrow-name">' + (m.name||'') + '</div>' +
+        '<div class="builder-mrow-meta">' +
+          '<span class="builder-mrow-cat">' + catLabel + '</span>' +
+          '<span class="builder-mrow-def">' + (m.definition||'') + '</span>' +
+        '</div>' +
+      '</div>' +
       '</div>';
   }).join('');
 }
