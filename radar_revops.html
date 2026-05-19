@@ -3321,6 +3321,13 @@ function _builderDateSQL(val,from,to) {
 }
 
 function _builderRenderPrompt() {
+  try { _builderRenderPromptInner(); }
+  catch(e) {
+    var ta = document.getElementById('builder-prompt-output');
+    if (ta) ta.value = 'ERROR: ' + e.message + '\n\nStack:\n' + (e.stack||'');
+  }
+}
+function _builderRenderPromptInner() {
   // ── Read all config fields ──
   var name     = (document.getElementById('bd-name')||{}).value || 'RevOps Dashboard';
   // Date filter
@@ -3561,7 +3568,7 @@ function _builderRenderPrompt() {
 
   var ta = document.getElementById('builder-prompt-output');
   if (ta) ta.value = _promptText;
-}
+} // end _builderRenderPromptInner
 
 function builderCopyPrompt() {
   var ta  = document.getElementById('builder-prompt-output');
