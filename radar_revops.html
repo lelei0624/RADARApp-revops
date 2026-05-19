@@ -1004,20 +1004,24 @@ git push origin main</div>
         <div class="github-num">1</div>
         <div class="github-body">
           <div class="github-title">Fill in your specifics below, then paste the prompt into Claude</div>
-          <div class="github-desc" style="margin-bottom:10px">Claude will return all 5 project files in one response — ready to copy into your project folder. Just fill in the section at the bottom before pasting.</div>
+          <div class="github-desc" style="margin-bottom:10px">Claude will create all 6 project files as <strong>downloadable artifacts</strong> — not pasted in the chat. You download each file and drop them into your project folder. Fill in your specifics at the bottom before pasting.</div>
           <div class="prompt-wrap" id="build-prompt-wrap">
             <div class="prompt-header">
               <span class="prompt-label">📋 RevOps Dashboard Builder — paste into Claude</span>
               <button class="prompt-copy-btn" onclick="cpPrompt('build-prompt-text')">Copy Prompt</button>
             </div>
-            <div class="prompt-text" id="build-prompt-text">You are a RevOps Data Analytics Engineer at Sprout Solutions. Generate ALL of the following project files in one response. Label each file clearly with its filename before the code block.
+            <div class="prompt-text" id="build-prompt-text">You are a RevOps Data Analytics Engineer at Sprout Solutions.
 
-FILES TO GENERATE:
+⚠️  OUTPUT FORMAT — IMPORTANT:
+Do NOT paste file contents in the chat. Instead, create each file as a separate artifact/downloadable so the user can download the whole project folder. Use Claude's artifact feature for each file. Label every artifact with its exact filename.
+
+FILES TO CREATE (as downloadable artifacts, one artifact per file):
 1. fetch_data.py             — queries Databricks, saves raw records to data/dashboard.json
 2. dashboard.html            — standalone HTML dashboard, reads data/dashboard.json client-side
-3. .gitignore                — prevents credentials from being committed
-4. refresh_and_push.bat      — Windows batch file for scheduled local refresh
-5. .github/workflows/refresh.yml — GitHub Actions for cloud auto-refresh
+3. .env                      — credentials template the user fills in (NEVER hardcoded)
+4. .gitignore                — prevents .env and credentials from being committed
+5. refresh_and_push.bat      — Windows batch file for scheduled local refresh
+6. .github/workflows/refresh.yml — GitHub Actions for cloud auto-refresh
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📁 FILE 1: fetch_data.py — Requirements
@@ -1221,7 +1225,23 @@ Detail tables: won deals (with OTP + Implem Fee columns), leads, SQLs — CSV ex
 "Last refreshed" timestamp from json.refreshed_at
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 FILES 3–5: TEMPLATES
+📁 FILE 3: .env — Credentials Template
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Create as a plain text file named exactly ".env" in the project root.
+⚠️  Already in .gitignore — will NEVER be committed to GitHub.
+The user fills in their own values below.
+
+# ─────────────────────────────────────────────────────────────
+# Databricks Connection — get from: SQL Warehouses → RevOps_SQL → Connection Details
+# ─────────────────────────────────────────────────────────────
+DATABRICKS_HOST=adb-XXXXXXXXXXXXXXXX.XX.azuredatabricks.net
+DATABRICKS_HTTP_PATH=/sql/1.0/warehouses/XXXXXXXXXXXXXXXXX
+
+# Personal Access Token — generate at: Settings → Developer → Access Tokens
+DATABRICKS_TOKEN=dapi...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 FILES 4–6: TEMPLATES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 .gitignore → include: .env, __pycache__/, *.pyc, node_modules/, refresh_log.txt
 
@@ -1288,6 +1308,7 @@ mkdir .github\workflows</div>
               <div style="font-weight:700;color:#0B1E10;margin-bottom:4px">Root folder</div>
               <div>📄 <code>fetch_data.py</code></div>
               <div>📄 <code>dashboard.html</code></div>
+              <div>📄 <code>.env</code> <span style="font-size:10px;color:rgba(255,255,255,.4)">(fill in your tokens)</span></div>
               <div>📄 <code>.gitignore</code></div>
               <div>📄 <code>refresh_and_push.bat</code></div>
             </div>
@@ -3998,13 +4019,16 @@ function _builderRenderPromptInner() {
     : _dashDateStyle==='monthly' ? 'Monthly Dropdown (month + year)' : 'Not specified';
 
   var _promptText =
-    'You are a RevOps Data Analytics Engineer at Sprout Solutions. Generate ALL of the following project files in one response. Label each file clearly with its filename before the code block.\n\n'
-    + 'FILES TO GENERATE:\n'
+    'You are a RevOps Data Analytics Engineer at Sprout Solutions.\n\n'
+    + '⚠️  OUTPUT FORMAT — IMPORTANT:\n'
+    + 'Do NOT paste file contents in the chat. Instead, create each file as a separate artifact/downloadable so the user can download the whole project folder. Use Claude\'s artifact feature for each file. Label every artifact with its exact filename (e.g. fetch_data.py, dashboard.html, .env, etc.).\n\n'
+    + 'FILES TO CREATE (as downloadable artifacts, one artifact per file):\n'
     + '1. fetch_data.py             — queries Databricks, saves raw records to data/dashboard.json\n'
     + '2. dashboard.html            — standalone HTML dashboard, reads data/dashboard.json client-side\n'
-    + '3. .gitignore                — prevents credentials from being committed\n'
-    + '4. refresh_and_push.bat      — Windows batch file for scheduled local refresh\n'
-    + '5. .github/workflows/refresh.yml — GitHub Actions for cloud auto-refresh\n\n'
+    + '3. .env                      — credentials template the user fills in (tokens never hardcoded)\n'
+    + '4. .gitignore                — prevents .env and credentials from being committed\n'
+    + '5. refresh_and_push.bat      — Windows batch file for scheduled local refresh\n'
+    + '6. .github/workflows/refresh.yml — GitHub Actions for cloud auto-refresh\n\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     + '⚠️  IMPORTANT — DATA CONTEXT\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
@@ -4049,10 +4073,22 @@ function _builderRenderPromptInner() {
     + 'OUTPUT — data/dashboard.json:\n'
     + '  { "refreshed_at": "YYYY-MM-DDTHH:MM:SSZ", "team": "' + name + '",\n'
     + '    "deals": [...], "summary": [...], "targets": [...] }\n\n'
-    + '.env structure:\n'
-    + '  DATABRICKS_HOST=adb-XXXXXXXX.azuredatabricks.net\n'
-    + '  DATABRICKS_HTTP_PATH=/sql/1.0/warehouses/XXXXXXXXXX\n'
-    + '  DATABRICKS_TOKEN=dapi...\n\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    + '📁 FILE 3: .env — Credentials Template\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    + 'Create this as a plain text file named exactly ".env" in the project root.\n'
+    + 'The user fills in their own values. NEVER hardcode these in any other file.\n'
+    + '⚠️ This file is already listed in .gitignore — it will NEVER be committed to GitHub.\n\n'
+    + '# ─────────────────────────────────────────────────────\n'
+    + '# Databricks Connection — fill in your own values below\n'
+    + '# Get these from: Databricks → SQL Warehouses → RevOps_SQL → Connection Details\n'
+    + '# ─────────────────────────────────────────────────────\n'
+    + 'DATABRICKS_HOST=adb-XXXXXXXXXXXXXXXX.XX.azuredatabricks.net\n'
+    + 'DATABRICKS_HTTP_PATH=/sql/1.0/warehouses/XXXXXXXXXXXXXXXXX\n\n'
+    + '# Personal Access Token — generate at: Databricks → Settings → Developer → Access Tokens\n'
+    + 'DATABRICKS_TOKEN=dapi...\n\n'
+    + '# Optional: override the default warehouse ID shown above\n'
+    + '# DATABRICKS_WAREHOUSE_ID=XXXXXXXXXXXXXXXXX\n\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     + '📁 FILE 2: dashboard.html — Requirements\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
@@ -4180,9 +4216,9 @@ function _builderRenderPromptInner() {
     + 'Design: Dark theme (#030712 bg, #1DB954 accent, white text), Chart.js charts, responsive grid, executive-level.\n'
     + 'Include "Last refreshed" timestamp from json.refreshed_at in the header.\n\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-    + '📋 FILES 3–5 TEMPLATES\n'
+    + '📋 FILES 4–6 TEMPLATES\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-    + '.gitignore → include: .env, __pycache__/, *.pyc, node_modules/, refresh_log.txt\n\n'
+    + '.gitignore → include: .env, __pycache__/, *.pyc, node_modules/, refresh_log.txt, data/dashboard.json\n\n'
     + 'refresh_and_push.bat → cd to project folder, run python fetch_data.py,\n'
     + 'git add data/dashboard.json, commit with timestamp, git push origin master.\n'
     + 'Log output to refresh_log.txt. Exit on error.\n\n'
