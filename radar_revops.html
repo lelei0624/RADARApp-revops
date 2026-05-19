@@ -446,6 +446,11 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
 .bd-select-multi{width:100%;background:#0f1923;color:#e2e8f0;border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:4px;font-size:12px;font-family:inherit;outline:none;cursor:pointer}
 .bd-select-multi option{padding:4px 6px}
 .bd-select-multi option:checked{background:#1a3a2a;color:#4ade80}
+
+.bd-date-mode-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.bd-date-mode-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;cursor:pointer;font-size:13px;color:#94a3b8;transition:all .15s}
+.bd-date-mode-btn:has(input:checked){background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:#4ade80}
+.bd-date-mode-btn input{display:none}
 </style>
 </head>
 <body>
@@ -1569,8 +1574,26 @@ DATABRICKS_TOKEN</div>
 
       <!-- Date Filter -->
       <div class="bd-section">
-        <div class="bd-section-title">Date Filter</div>
-        <div class="bd-date-row">
+        <div class="bd-section-title">Date Filter <span class="bd-col-tag">create_date / close_date</span></div>
+
+        <!-- Mode selector -->
+        <div class="bd-date-mode-row">
+          <label class="bd-date-mode-btn">
+            <input type="radio" name="bd-date-mode" value="all" checked onchange="bdDateMode('all')">
+            <span>All Data</span>
+          </label>
+          <label class="bd-date-mode-btn">
+            <input type="radio" name="bd-date-mode" value="range" onchange="bdDateMode('range')">
+            <span>Date Range</span>
+          </label>
+          <label class="bd-date-mode-btn">
+            <input type="radio" name="bd-date-mode" value="monthly" onchange="bdDateMode('monthly')">
+            <span>Monthly</span>
+          </label>
+        </div>
+
+        <!-- Date Range inputs -->
+        <div id="bd-date-range" style="display:none" class="bd-date-row">
           <div class="builder-field">
             <label class="builder-label">From</label>
             <input class="builder-input" id="bd-from" type="date">
@@ -1578,6 +1601,36 @@ DATABRICKS_TOKEN</div>
           <div class="builder-field">
             <label class="builder-label">To</label>
             <input class="builder-input" id="bd-to" type="date">
+          </div>
+        </div>
+
+        <!-- Monthly selector -->
+        <div id="bd-date-monthly" style="display:none" class="bd-date-row">
+          <div class="builder-field">
+            <label class="builder-label">Month</label>
+            <select class="builder-input" id="bd-month" style="cursor:pointer">
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
+          <div class="builder-field">
+            <label class="builder-label">Year</label>
+            <select class="builder-input" id="bd-year" style="cursor:pointer">
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+            </select>
           </div>
         </div>
       </div>
@@ -3286,6 +3339,11 @@ function _builderRenderChips() {
     : '<span style="color:rgba(255,255,255,.3);font-size:13px">No metrics selected</span>';
 }
 
+
+function bdDateMode(mode) {
+  document.getElementById('bd-date-range').style.display   = mode === 'range'   ? 'flex' : 'none';
+  document.getElementById('bd-date-monthly').style.display = mode === 'monthly' ? 'flex' : 'none';
+}
 function bdViewToggle(cb) {
   var card = cb.closest ? cb.closest('.bd-view-card') : cb.parentNode;
   if (card) card.classList.toggle('bd-view-checked', cb.checked);
@@ -3312,8 +3370,22 @@ function _builderDateSQL(val,from,to) {
 function _builderRenderPrompt() {
   // ── Read all config fields ──
   var name     = (document.getElementById('bd-name')||{}).value || 'RevOps Dashboard';
-  var fromDate = (document.getElementById('bd-from')||{}).value || '';
-  var toDate   = (document.getElementById('bd-to')||{}).value || '';
+  // Date filter — read based on selected mode
+  var _dateMode = (document.querySelector('input[name="bd-date-mode"]:checked')||{}).value || 'all';
+  var fromDate = '', toDate = '';
+  if (_dateMode === 'range') {
+    fromDate = (document.getElementById('bd-from')||{}).value || '';
+    toDate   = (document.getElementById('bd-to')||{}).value || '';
+  } else if (_dateMode === 'monthly') {
+    var _mo = (document.getElementById('bd-month')||{}).value || '';
+    var _yr = (document.getElementById('bd-year')||{}).value || '';
+    if (_mo && _yr) {
+      var _lastDay = new Date(_yr, parseInt(_mo), 0).getDate();
+      fromDate = _yr + '-' + _mo + '-01';
+      toDate   = _yr + '-' + _mo + '-' + _lastDay;
+    }
+  }
+  // _dateMode === 'all' -> fromDate and toDate stay empty (no date filter)
   // Sales Rep: multi-select
   var repEl = document.getElementById('bd-rep');
   var rep = repEl ? Array.from(repEl.selectedOptions).map(function(o){return o.value;}).join(', ') : '';
