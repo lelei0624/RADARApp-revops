@@ -1583,7 +1583,7 @@ DATABRICKS_TOKEN</div>
         <div class="bd-filters-grid">
 
           <div class="bd-filter-box">
-            <div class="bd-filter-box-title">Segment</div>
+            <div class="bd-filter-box-title">Segment <span class="bd-col-tag">segment_official</span></div>
             <div class="bd-check-list" id="bd-segment-group">
               <label class="bd-check-item"><input type="checkbox" value="SME"> SME</label>
               <label class="bd-check-item"><input type="checkbox" value="ENT"> Enterprise (ENT)</label>
@@ -1592,7 +1592,7 @@ DATABRICKS_TOKEN</div>
           </div>
 
           <div class="bd-filter-box">
-            <div class="bd-filter-box-title">Pipeline</div>
+            <div class="bd-filter-box-title">Pipeline <span class="bd-col-tag">pipeline_name</span></div>
             <div class="bd-check-list" id="bd-pipeline-group">
               <label class="bd-check-item"><input type="checkbox" value="Sales Pipeline"> Sales Pipeline</label>
               <label class="bd-check-item"><input type="checkbox" value="PH Upsell Pipeline"> PH Upsell Pipeline</label>
@@ -1602,19 +1602,19 @@ DATABRICKS_TOKEN</div>
           </div>
 
           <div class="bd-filter-box">
-            <div class="bd-filter-box-title">Lead Source / Department</div>
+            <div class="bd-filter-box-title">Lead Source / Department <span class="bd-col-tag">department_source_clean</span></div>
             <div class="bd-check-list" id="bd-source-group">
-              <label class="bd-check-item"><input type="checkbox" value="Marketing"> Marketing</label>
+              <label class="bd-check-item"><input type="checkbox" value="MKT Inbound"> MKT Inbound</label>
               <label class="bd-check-item"><input type="checkbox" value="LDU Outbound"> LDU Outbound</label>
-              <label class="bd-check-item"><input type="checkbox" value="LDU Inbound"> LDU Inbound</label>
-              <label class="bd-check-item"><input type="checkbox" value="Sales"> Sales</label>
+              <label class="bd-check-item"><input type="checkbox" value="Sales Outbound"> Sales Outbound</label>
               <label class="bd-check-item"><input type="checkbox" value="Channels"> Channels</label>
-              <label class="bd-check-item"><input type="checkbox" value="CSM"> CSM</label>
+              <label class="bd-check-item"><input type="checkbox" value="CSM Inbound"> CSM Inbound</label>
+              <label class="bd-check-item"><input type="checkbox" value="Upsell Outbound"> Upsell Outbound</label>
             </div>
           </div>
 
           <div class="bd-filter-box">
-            <div class="bd-filter-box-title">Industry</div>
+            <div class="bd-filter-box-title">Industry <span class="bd-col-tag">industry</span></div>
             <div class="bd-check-list" id="bd-industry-group">
               <label class="bd-check-item"><input type="checkbox" value="Retail"> Retail</label>
               <label class="bd-check-item"><input type="checkbox" value="Services"> Services</label>
@@ -1623,23 +1623,56 @@ DATABRICKS_TOKEN</div>
               <label class="bd-check-item"><input type="checkbox" value="F&amp;B"> F&amp;B</label>
               <label class="bd-check-item"><input type="checkbox" value="Technology"> Technology</label>
               <label class="bd-check-item"><input type="checkbox" value="Education"> Education</label>
+              <label class="bd-check-item"><input type="checkbox" value="Financial Services"> Financial Services</label>
+              <label class="bd-check-item"><input type="checkbox" value="Real Estate"> Real Estate</label>
+              <label class="bd-check-item"><input type="checkbox" value="Logistics"> Logistics</label>
+              <label class="bd-check-item"><input type="checkbox" value="Construction"> Construction</label>
+              <label class="bd-check-item"><input type="checkbox" value="Media &amp; Entertainment"> Media &amp; Entertainment</label>
+              <label class="bd-check-item"><input type="checkbox" value="Government"> Government</label>
+              <label class="bd-check-item"><input type="checkbox" value="BPO"> BPO</label>
             </div>
           </div>
 
           <div class="bd-filter-box">
-            <div class="bd-filter-box-title">Sales Rep <span style="font-weight:400;text-transform:none">(type names)</span></div>
-            <input class="builder-input" id="bd-rep" type="text" placeholder="e.g. Katryn Saldajeno, Ferdie Salvosa" style="font-size:12px">
+            <div class="bd-filter-box-title">Sales Rep <span class="bd-col-tag">sales_rep</span></div>
+            <select class="bd-select-multi" id="bd-rep" multiple size="6">
+              <option value="Katryn Saldajeno">Katryn Saldajeno</option>
+              <option value="Ferdie Salvosa">Ferdie Salvosa</option>
+              <option value="Nica Vicente">Nica Vicente</option>
+              <option value="Ryan Rayos">Ryan Rayos</option>
+              <option value="Jhon Chumacera">Jhon Chumacera</option>
+              <option value="Crystel Ibanez">Crystel Ibanez</option>
+              <option value="Jade Lopez">Jade Lopez</option>
+              <option value="Shiara Arenas">Shiara Arenas</option>
+              <option value="Jessa Villanueva">Jessa Villanueva</option>
+              <option value="Alyssa Magalona">Alyssa Magalona</option>
+              <option value="Francis Guasque">Francis Guasque</option>
+              <option value="Donna Pomento">Donna Pomento</option>
+              <option value="Mark Pulido">Mark Pulido</option>
+              <option value="Noel Duran">Noel Duran</option>
+              <option value="Joyce Losbanos">Joyce Losbanos</option>
+            </select>
+            <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:4px">Hold Ctrl / Cmd to select multiple</div>
           </div>
 
           <div class="bd-filter-box">
-            <div class="bd-filter-box-title">Team <span style="font-weight:400;text-transform:none">(type team name)</span></div>
-            <input class="builder-input" id="bd-team" type="text" placeholder="e.g. Team A, PH Sales Team" style="font-size:12px">
+            <div class="bd-filter-box-title">Team <span class="bd-col-tag">hubspot_team</span></div>
+            <select class="bd-select-multi" id="bd-team" multiple size="6">
+              <option value="PH SME Sales">PH SME Sales</option>
+              <option value="PH ENT Sales">PH ENT Sales</option>
+              <option value="TH Sales">TH Sales</option>
+              <option value="Channels">Channels</option>
+              <option value="Upsell">Upsell</option>
+              <option value="LDU">LDU</option>
+              <option value="CSM">CSM</option>
+            </select>
+            <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:4px">Hold Ctrl / Cmd to select multiple</div>
           </div>
 
         </div>
       </div>
 
-      <!-- Views to Include -->
+            <!-- Views to Include -->
       <div class="bd-section">
         <div class="bd-section-title">Views to Include <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:rgba(255,255,255,.25)">(select all that apply)</span></div>
         <div class="bd-views-grid" id="bd-views-group">
@@ -3276,8 +3309,12 @@ function _builderRenderPrompt() {
   var name     = (document.getElementById('bd-name')||{}).value || 'RevOps Dashboard';
   var fromDate = (document.getElementById('bd-from')||{}).value || '';
   var toDate   = (document.getElementById('bd-to')||{}).value || '';
-  var rep      = (document.getElementById('bd-rep')||{}).value || '';
-  var team     = (document.getElementById('bd-team')||{}).value || '';
+  // Sales Rep: multi-select
+  var repEl = document.getElementById('bd-rep');
+  var rep = repEl ? Array.from(repEl.selectedOptions).map(function(o){return o.value;}).join(', ') : '';
+  // Team: multi-select
+  var teamEl = document.getElementById('bd-team');
+  var team = teamEl ? Array.from(teamEl.selectedOptions).map(function(o){return o.value;}).join(', ') : '';
 
   function getChecked(groupId) {
     var vals = [];
