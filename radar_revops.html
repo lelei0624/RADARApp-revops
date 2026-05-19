@@ -2968,297 +2968,202 @@ renderDashboards();
 })();
 
 // ── DASHBOARD BUILDER ──
-(function() {
-  const BUILDER_CATS = ['All', 'Finance', 'Funnel', 'Revenue', 'Sales_Productivity', 'Marketing_Efficiency', 'Product_Performance'];
-  const BUILDER_CAT_LABELS = {
-    All: 'All',
-    Finance: 'Finance',
-    Funnel: 'Funnel',
-    Revenue: 'Revenue',
-    Sales_Productivity: 'Sales',
-    Marketing_Efficiency: 'Marketing',
-    Product_Performance: 'Product'
-  };
+var _builderSelectedIds = new Set();
+var _builderActiveCat   = '';
+var _builderSearchVal   = '';
+var _builderCurrentStep = 1;
+var _builderInited      = false;
+var BUILDER_CATS = ['All','Finance','Funnel','Revenue','Sales_Productivity','Marketing_Efficiency','Product_Performance'];
+var BUILDER_CAT_LABELS = {All:'All',Finance:'Finance',Funnel:'Funnel',Revenue:'Revenue',Sales_Productivity:'Sales',Marketing_Efficiency:'Marketing',Product_Performance:'Product'};
 
-  let builderSelectedIds = new Set();
-  let builderActiveCat = '';
-  let builderSearchVal = '';
-  let builderCurrentStep = 1;
+function _getBuilderMetrics() { return window._LIVE_METRICS || METRICS || []; }
 
-  function getMetrics() {
-    return window._LIVE_METRICS || METRICS;
+function builderFilterMetrics() {
+  var inp = document.getElementById('builder-search');
+  _builderSearchVal = inp ? inp.value.toLowerCase() : '';
+  var filtered = _getBuilderMetrics().filter(function(m) {
+    var matchCat = !_builderActiveCat || m.category === _builderActiveCat;
+    var matchQ   = !_builderSearchVal ||
+      (m.name||'').toLowerCase().includes(_builderSearchVal) ||
+      (m.definition||'').toLowerCase().includes(_builderSearchVal) ||
+      (m.category||'').toLowerCase().includes(_builderSearchVal);
+    return matchCat && matchQ;
+  });
+  _builderRenderMetrics(filtered);
+}
+
+function _builderRenderMetrics(metrics) {
+  var grid = document.getElementById('builder-metrics-grid');
+  if (!grid) return;
+  if (!metrics.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:#636E72"><div style="font-size:44px">&#128269;</div><p style="margin-top:12px">No metrics found</p></div>';
+    return;
   }
+  grid.innerHTML = metrics.map(function(m) {
+    var sel = _builderSelectedIds.has(m.name);
+    var catLabel = BUILDER_CAT_LABELS[m.category] || m.category || '';
+    var safeN = JSON.stringify(m.name);
+    return '<div class="builder-mcard' + (sel?' selected':'') + '" onclick="builderToggleMetric(' + safeN + ')">' +
+      '<div class="builder-mcard-check">' + (sel?'&#10003;':'') + '</div>' +
+      '<div class="builder-mcard-name">' + (m.name||'') + '</div>' +
+      '<div class="builder-mcard-cat"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(29,185,84,.15);color:#1DB954;border:1px solid rgba(29,185,84,.3)">' + catLabel + '</span></div>' +
+      '<div class="builder-mcard-def">' + (m.definition||'') + '</div>' +
+      '</div>';
+  }).join('');
+}
 
-  // Render category filter buttons
-  function initBuilderCatFilters() {
-    const wrap = document.getElementById('builder-cat-filters');
-    if (!wrap) return;
-    wrap.innerHTML = BUILDER_CATS.map(c => {
-      const label = BUILDER_CAT_LABELS[c] || c;
-      const isAll = c === 'All';
-      return `<button class="fb${isAll ? ' active' : ''}" data-bcat="${isAll ? '' : c}" onclick="window._builderSetCat(this)">${label}</button>`;
-    }).join('');
+function builderToggleMetric(name) {
+  if (_builderSelectedIds.has(name)) { _builderSelectedIds.delete(name); }
+  else { _builderSelectedIds.add(name); }
+  _builderUpdateCount();
+  builderFilterMetrics();
+}
+
+function _builderUpdateCount() {
+  var n = _builderSelectedIds.size;
+  var el = document.getElementById('builder-selected-count');
+  if (el) el.textContent = n + ' metric' + (n!==1?'s':'') + ' selected';
+  var btn = document.getElementById('builder-next-1');
+  if (btn) btn.disabled = n === 0;
+}
+
+function builderSetCat(el) {
+  _builderActiveCat = el.dataset.bcat || '';
+  document.querySelectorAll('#builder-cat-filters .fb').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  builderFilterMetrics();
+}
+
+function _builderInitCatFilters() {
+  var wrap = document.getElementById('builder-cat-filters');
+  if (!wrap) return;
+  wrap.innerHTML = BUILDER_CATS.map(function(c) {
+    var isAll = c==='All';
+    return '<button class="fb'+(isAll?' active':'')+'" data-bcat="'+(isAll?'':c)+'" onclick="builderSetCat(this)">'+(BUILDER_CAT_LABELS[c]||c)+'</button>';
+  }).join('');
+}
+
+function builderGoStep(n) {
+  if (n===2 && _builderSelectedIds.size===0) return;
+  if (n===2) _builderRenderChips();
+  if (n===3) _builderRenderPrompt();
+  if (n===1) { _builderSelectedIds=new Set(); _builderUpdateCount(); builderFilterMetrics(); }
+  _builderCurrentStep = n;
+  for (var i=1;i<=3;i++) {
+    var p = document.getElementById('builder-step-'+i);
+    if (p) p.style.display = i===n?'block':'none';
+    var d = document.getElementById('bsi-'+i);
+    if (d) { d.classList.remove('active','done'); if(i<n)d.classList.add('done'); else if(i===n)d.classList.add('active'); }
+    var l = document.getElementById('bsl-'+i);
+    if (l) l.classList.toggle('done',i<n);
   }
+  var c = document.querySelector('.content-area');
+  if (c) c.scrollTop = 0;
+}
 
-  window._builderSetCat = function(el) {
-    builderActiveCat = el.dataset.bcat || '';
-    document.querySelectorAll('#builder-cat-filters .fb').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-    builderFilterMetrics();
-  };
+function _builderRenderChips() {
+  var wrap = document.getElementById('builder-chips');
+  if (!wrap) return;
+  wrap.innerHTML = Array.from(_builderSelectedIds).map(function(name){
+    return '<span class="builder-chip">'+name+'</span>';
+  }).join('');
+}
 
-  function builderFilterMetrics() {
-    builderSearchVal = (document.getElementById('builder-search') && document.getElementById('builder-search').value || '').toLowerCase();
-    const metrics = getMetrics().filter(m => {
-      const matchCat = !builderActiveCat || m.category === builderActiveCat;
-      const matchSearch = !builderSearchVal || m.name.toLowerCase().includes(builderSearchVal) ||
-        (m.definition || '').toLowerCase().includes(builderSearchVal) ||
-        (m.category || '').toLowerCase().includes(builderSearchVal);
-      return matchCat && matchSearch;
-    });
-    renderBuilderMetrics(metrics);
-  }
-  window.builderFilterMetrics = builderFilterMetrics;
+function builderToggleCustomDates() {
+  var sel = document.getElementById('builder-date-range');
+  var cd  = document.getElementById('builder-custom-dates');
+  if (sel&&cd) cd.style.display = sel.value==='Custom'?'flex':'none';
+}
 
-  function renderBuilderMetrics(metrics) {
-    const grid = document.getElementById('builder-metrics-grid');
-    if (!grid) return;
-    if (!metrics.length) {
-      grid.innerHTML = '<div class="empty-state"><div style="font-size:44px">🔍</div><h3>No metrics found</h3><p>Try a different search or filter</p></div>';
-      return;
-    }
-    grid.innerHTML = metrics.map((m, i) => {
-      const sel = builderSelectedIds.has(m.name);
-      const catLabel = CL[m.category] || m.category || '';
-      const catColor = DC[m.category] || '#636';
-      return `<div class="builder-mcard${sel ? ' selected' : ''}" onclick="window._builderToggleMetric(${JSON.stringify(m.name)})">
-        <div class="builder-mcard-check">${sel ? '✓' : ''}</div>
-        <div class="builder-mcard-name">${m.name}</div>
-        <div class="builder-mcard-cat"><span class="cat-badge cat-${m.category}">${catLabel}</span></div>
-        <div class="builder-mcard-def" title="${(m.definition || '').replace(/"/g,'&quot;')}">${m.definition || ''}</div>
-      </div>`;
-    }).join('');
-  }
+function _builderDateSQL(val,from,to) {
+  if (val==='MTD') return "create_date >= DATE_TRUNC('month', CURRENT_DATE()) AND create_date <= CURRENT_DATE()";
+  if (val==='QTD') return "create_date >= DATE_TRUNC('quarter', CURRENT_DATE()) AND create_date <= CURRENT_DATE()";
+  if (val==='YTD') return "YEAR(create_date) = YEAR(CURRENT_DATE())";
+  if (val==='Last 30 Days') return 'create_date >= CURRENT_DATE() - INTERVAL 30 DAYS';
+  if (val==='Last 90 Days') return 'create_date >= CURRENT_DATE() - INTERVAL 90 DAYS';
+  if (val==='Custom') return "create_date >= '"+from+"' AND create_date <= '"+to+"'";
+  return "create_date >= DATE_TRUNC('month', CURRENT_DATE())";
+}
 
-  window._builderToggleMetric = function(name) {
-    if (builderSelectedIds.has(name)) {
-      builderSelectedIds.delete(name);
-    } else {
-      builderSelectedIds.add(name);
-    }
-    updateBuilderCount();
-    builderFilterMetrics();
-  };
+function _builderRenderPrompt() {
+  var name     = (document.getElementById('builder-dash-name')||{}).value||'RevOps Dashboard';
+  var dateVal  = (document.getElementById('builder-date-range')||{}).value||'MTD';
+  var fromDate = (document.getElementById('builder-from')||{}).value||'';
+  var toDate   = (document.getElementById('builder-to')||{}).value||'';
+  var pipeline = (document.getElementById('builder-pipeline')||{}).value||'All Pipelines';
+  var segment  = (document.getElementById('builder-segment')||{}).value||'All Segments';
+  var viewType = (document.getElementById('builder-view-type')||{}).value||'KPI Cards + Charts';
+  var dateSQL  = _builderDateSQL(dateVal,fromDate,toDate);
+  var pipeSQL  = pipeline==='All Pipelines'
+    ? "pipeline_name IN ('Sales Pipeline','PH Upsell Pipeline','Unified Channel Pipeline','TH Sales Pipeline')"
+    : "pipeline_name = '"+pipeline+"'";
+  var segSQL   = segment==='All Segments' ? '' : "AND segment = '"+segment+"'";
+  var selected = _getBuilderMetrics().filter(function(m){return _builderSelectedIds.has(m.name);});
 
-  function updateBuilderCount() {
-    const count = builderSelectedIds.size;
-    const el = document.getElementById('builder-selected-count');
-    if (el) el.textContent = count + ' metric' + (count !== 1 ? 's' : '') + ' selected';
-    const btn = document.getElementById('builder-next-1');
-    if (btn) btn.disabled = count === 0;
-  }
+  var mBlock = selected.map(function(m){
+    var lines = ['### '+m.name];
+    if(m.definition)        lines.push('- **Definition:** '+m.definition);
+    if(m.business_question) lines.push('- **Business Question:** '+m.business_question);
+    if(m.formula)           lines.push('- **Formula:** '+m.formula);
+    if(m.sql)               lines.push('- **SQL:**\n```sql\n'+m.sql+'\n```');
+    if(m.filters)           lines.push('- **Filters:** '+m.filters);
+    if(m.exclusions)        lines.push('- **Exclusions:** '+m.exclusions);
+    return lines.join('\n');
+  }).join('\n\n');
 
-  function builderGoStep(n) {
-    if (n === 2) {
-      if (builderSelectedIds.size === 0) return;
-      renderBuilderChips();
-    }
-    if (n === 3) {
-      renderBuilderPrompt();
-    }
-    if (n === 1) {
-      // reset to step 1 (start over)
-      builderSelectedIds = new Set();
-      updateBuilderCount();
-      builderFilterMetrics();
-    }
+  var prompt = 'You are building a '+viewType+' RevOps dashboard called "'+name+'" for Sprout Solutions using Databricks SQL (shared.revops schema).\n\n'
+    +'## Dashboard Configuration\n'
+    +'- Date Range: '+dateVal+'\n'
+    +'- Pipeline: '+pipeline+'\n'
+    +'- Segment: '+segment+'\n'
+    +'- View Type: '+viewType+'\n\n'
+    +'## Metrics to Include\n\n'+mBlock+'\n\n'
+    +'## Global SQL Filters (apply to ALL queries)\n'
+    +'```sql\n'
+    +'-- Date\n'+dateSQL+'\n'
+    +'-- Pipeline\n'+pipeSQL+'\n'
+    +(segSQL ? '-- Segment\n'+segSQL+'\n' : '')
+    +"-- Exclude renewals (always)\nAND deal_type NOT IN ('Renewal','Upsell - Renewal') AND LOWER(deal_name) NOT LIKE '%renewal%'\n```\n\n"
+    +'## Build Instructions\n'
+    +'1. Use the exact SQL and filters above - do not change business logic\n'
+    +'2. Databricks SQL: USE CATALOG shared; USE SCHEMA revops;\n'
+    +'3. Apply all global filters to every query\n'
+    +'4. Build as a single self-contained HTML file:\n'
+    +'   - Dark theme (#030712 bg, #1DB954 accent, white text)\n'
+    +'   - Responsive grid layout (KPI cards + charts)\n'
+    +'   - Executive-level professional design\n'
+    +'   - Header showing dashboard name, date range, and filters applied\n'
+    +'5. Use Chart.js (CDN) for any charts';
 
-    builderCurrentStep = n;
+  var ta = document.getElementById('builder-prompt-output');
+  if (ta) ta.value = prompt;
+}
 
-    // Update step panels
-    for (let i = 1; i <= 3; i++) {
-      const panel = document.getElementById('builder-step-' + i);
-      if (panel) panel.style.display = i === n ? 'block' : 'none';
-    }
+function builderCopyPrompt() {
+  var ta  = document.getElementById('builder-prompt-output');
+  var btn = document.getElementById('builder-copy-btn');
+  if (!ta||!btn) return;
+  navigator.clipboard.writeText(ta.value).then(function(){
+    btn.textContent = 'Copied!';
+    setTimeout(function(){btn.textContent='Copy Prompt';},2000);
+  }).catch(function(){
+    ta.select(); document.execCommand('copy');
+    btn.textContent = 'Copied!';
+    setTimeout(function(){btn.textContent='Copy Prompt';},2000);
+  });
+}
 
-    // Update step indicator
-    for (let i = 1; i <= 3; i++) {
-      const dot = document.getElementById('bsi-' + i);
-      if (!dot) continue;
-      dot.classList.remove('active', 'done');
-      if (i === n) dot.classList.add('active');
-      else if (i < n) dot.classList.add('done');
-    }
-    for (let i = 1; i <= 2; i++) {
-      const line = document.getElementById('bsl-' + i);
-      if (line) {
-        line.classList.toggle('done', i < n);
-      }
-    }
+function _builderInitAll() {
+  if (_builderInited) return;
+  _builderInited = true;
+  _builderInitCatFilters();
+  builderFilterMetrics();
+  _builderUpdateCount();
+}
 
-    // Scroll to top of section
-    const sec = document.getElementById('section-builder');
-    if (sec) sec.scrollTop = 0;
-    const content = document.querySelector('.content-area');
-    if (content) content.scrollTop = 0;
-  }
-  window.builderGoStep = builderGoStep;
-
-  function renderBuilderChips() {
-    const wrap = document.getElementById('builder-chips');
-    if (!wrap) return;
-    wrap.innerHTML = [...builderSelectedIds].map(name =>
-      `<span class="builder-chip">${name}</span>`
-    ).join('');
-  }
-
-  function builderToggleCustomDates() {
-    const val = document.getElementById('bd-daterange') && document.getElementById('bd-daterange').value;
-    const show = val === 'Custom';
-    ['bd-custom-dates', 'bd-custom-dates-to'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = show ? 'flex' : 'none';
-    });
-  }
-  window.builderToggleCustomDates = builderToggleCustomDates;
-
-  function getDateFilterSQL(range, from, to) {
-    switch (range) {
-      case 'MTD':        return "create_date >= DATE_TRUNC('month', CURRENT_DATE()) AND create_date <= CURRENT_DATE()";
-      case 'QTD':        return "create_date >= DATE_TRUNC('quarter', CURRENT_DATE()) AND create_date <= CURRENT_DATE()";
-      case 'YTD':        return "YEAR(create_date) = YEAR(CURRENT_DATE())";
-      case 'Last 30 Days': return "create_date >= CURRENT_DATE() - INTERVAL 30 DAYS";
-      case 'Last 90 Days': return "create_date >= CURRENT_DATE() - INTERVAL 90 DAYS";
-      case 'Custom':     return `create_date >= '${from || 'YYYY-MM-DD'}' AND create_date <= '${to || 'YYYY-MM-DD'}'`;
-      default:           return "create_date >= DATE_TRUNC('month', CURRENT_DATE()) AND create_date <= CURRENT_DATE()";
-    }
-  }
-
-  function getPipelineFilter(pipeline) {
-    if (pipeline === 'All Pipelines') return '-- No pipeline filter (all pipelines)';
-    return `AND pipeline_name = '${pipeline}'`;
-  }
-
-  function getSegmentFilter(segment) {
-    if (segment === 'All Segments') return '-- No segment filter (all segments)';
-    return `AND CASE WHEN UPPER(segment) = 'MICRO' THEN 'SME' ELSE segment END = '${segment}'`;
-  }
-
-  function renderBuilderPrompt() {
-    const name      = (document.getElementById('bd-name') && document.getElementById('bd-name').value.trim()) || 'RevOps Dashboard';
-    const dateRange = (document.getElementById('bd-daterange') && document.getElementById('bd-daterange').value) || 'MTD';
-    const from      = (document.getElementById('bd-from') && document.getElementById('bd-from').value) || '';
-    const to        = (document.getElementById('bd-to') && document.getElementById('bd-to').value) || '';
-    const pipeline  = (document.getElementById('bd-pipeline') && document.getElementById('bd-pipeline').value) || 'All Pipelines';
-    const segment   = (document.getElementById('bd-segment') && document.getElementById('bd-segment').value) || 'All Segments';
-    const viewType  = (document.getElementById('bd-viewtype') && document.getElementById('bd-viewtype').value) || 'KPI Cards + Charts';
-
-    const allMetrics = getMetrics();
-    const selectedMetrics = [...builderSelectedIds].map(name => allMetrics.find(m => m.name === name)).filter(Boolean);
-
-    const metricBlocks = selectedMetrics.map(m => {
-      return `### ${m.name}
-- Definition: ${m.definition || '(see DataPedia)'}
-- Business Question: ${m.business_question || ''}
-- Formula: ${m.formula || ''}
-- SQL: ${m.sql || '(use shared.revops silver/gold tables per formula above)'}
-- Filters: ${m.filters || ''}
-- Exclusions: ${m.exclusions || ''}`;
-    }).join('\n\n');
-
-    const dateSQL = getDateFilterSQL(dateRange, from, to);
-    const pipelineFilter = getPipelineFilter(pipeline);
-    const segmentFilter = getSegmentFilter(segment);
-
-    const prompt = `You are building a ${viewType} RevOps dashboard called "${name}" for Sprout Solutions using Databricks SQL (shared.revops schema).
-
-## Dashboard Configuration
-- Date Range: ${dateRange}${dateRange === 'Custom' ? ` (${from} to ${to})` : ''}
-- Pipeline: ${pipeline}
-- Segment: ${segment}
-- View Type: ${viewType}
-
-## Metrics to Include
-${metricBlocks}
-
-## Instructions
-1. Use the exact SQL and filters provided above for each metric — do not modify the business logic
-2. All queries use Databricks SQL syntax against the shared.revops schema
-3. Apply these global filters to all queries:
-   - Pipeline: ${pipelineFilter}
-   - Segment: ${segmentFilter}
-   - Date Range: WHERE ${dateSQL}
-4. Exclude renewals: AND deal_type NOT IN ('Renewal','Upsell - Renewal') AND LOWER(deal_name) NOT LIKE '%renewal%'
-5. Build the dashboard as a single self-contained HTML file with:
-   - Dark theme (#030712 background, #1DB954 accent)
-   - Responsive grid layout
-   - Clean metric cards with current value + trend where possible
-   - Professional, executive-level design
-
-## Date Filter SQL
-WHERE ${dateSQL}
-
-## Data Platform
-USE CATALOG shared;
-USE SCHEMA revops;
-
-Gold tables (use first):
-- shared.revops.gold_monthly_exec_summary — pre-aggregated monthly KPIs
-- shared.revops.gold_targets — monthly targets
-- shared.revops.datapedia_approved — approved metric definitions
-
-Silver tables (drilldown only):
-- shared.revops.silver_deals — 1 row per deal
-- shared.revops.silver_line_items — product-level MRR
-- shared.revops.silver_company — company attributes
-
-## Core Data Rules (always apply)
-1. EXCLUDE RENEWALS: WHERE LOWER(COALESCE(deal_name,'')) NOT LIKE '%renewal%'
-2. SEGMENT: CASE WHEN UPPER(segment) = 'MICRO' THEN 'SME' ELSE segment END
-3. Always use department_source_clean (NOT raw department_source)
-4. Always use DISTINCT deal_id for counts
-5. Date basis: Funnel/Lead counts → create_date | Won/Revenue → close_date | Pipeline (TMRR) → projected_close_date`;
-
-    const textarea = document.getElementById('builder-prompt-output');
-    if (textarea) textarea.value = prompt;
-  }
-
-  function builderCopyPrompt() {
-    const textarea = document.getElementById('builder-prompt-output');
-    if (!textarea) return;
-    navigator.clipboard.writeText(textarea.value).then(() => {
-      const btn = document.getElementById('builder-copy-btn');
-      if (btn) {
-        btn.textContent = '✓ Copied!';
-        setTimeout(() => btn.textContent = '📋 Copy Prompt', 2000);
-      }
-    });
-  }
-  window.builderCopyPrompt = builderCopyPrompt;
-
-  // Initialize builder when first shown
-  function initBuilder() {
-    initBuilderCatFilters();
-    builderFilterMetrics();
-    updateBuilderCount();
-  }
-
-  // Hook into switchTab to init builder on first visit
-  const _origSwitchTab = window.switchTab;
-  // We patch at the bottom after switchTab is defined, using a flag
-  window._builderInited = false;
-  window._builderInit = function() {
-    if (!window._builderInited) {
-      window._builderInited = true;
-      initBuilder();
-    }
-  };
-  // Expose functions needed by inline HTML handlers
-  window.builderFilterMetrics  = builderFilterMetrics;
-  window.builderGoStep         = builderGoStep;
-  window.builderCopyPrompt     = builderCopyPrompt;
-  window.builderToggleCustomDates = builderToggleCustomDates;
-})();
+window._builderInit         = _builderInitAll;
+window._builderToggleMetric = builderToggleMetric;
+window._builderSetCat       = builderSetCat;
 
 // ── 3D CARD TILT ──
 document.querySelectorAll('.home-card').forEach(card => {
