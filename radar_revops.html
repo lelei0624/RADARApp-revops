@@ -1433,7 +1433,7 @@ DATABRICKS_TOKEN</div>
   </div>
 
   <!-- Step Indicator -->
-  <!-- BUILDER v20260519i -->
+  <!-- BUILDER v20260519j -->
   <div class="builder-steps-indicator">
     <div class="builder-step-dot active" id="bsi-1">
       <span class="bsi-num">1</span>
@@ -1455,7 +1455,7 @@ DATABRICKS_TOKEN</div>
   <div class="builder-step-panel active" id="builder-step-1">
     <div class="builder-panel-header">
       <div>
-        <div class="builder-panel-title">Step 1 of 3 — Select Metrics <span style="font-size:10px;opacity:.4;font-weight:400">v20260519i</span></div>
+        <div class="builder-panel-title">Step 1 of 3 — Select Metrics <span style="font-size:10px;opacity:.4;font-weight:400">v20260519j</span></div>
         <div class="builder-panel-sub">Choose the metrics to include in your dashboard. Selected metrics will be included with their exact definitions, formulas, and SQL logic.</div>
       </div>
       <div class="builder-selected-count" id="builder-selected-count">0 metrics selected</div>
@@ -3324,17 +3324,11 @@ function _builderRenderPrompt() {
     if(m.definition)        lines.push('- **Definition:** ' + m.definition);
     if(m.business_question) lines.push('- **Business Question:** ' + m.business_question);
     if(m.formula)           lines.push('- **Formula:** ' + m.formula);
-    if(m.sql)               lines.push('- **SQL:**
-```sql
-' + m.sql + '
-```');
+    if(m.sql)               lines.push('- **SQL:**\n```sql\n' + m.sql + '\n```');
     if(m.filters)           lines.push('- **Filters:** ' + m.filters);
     if(m.exclusions)        lines.push('- **Exclusions:** ' + m.exclusions);
-    return lines.join('
-');
-  }).join('
-
-');
+    return lines.join('\n');
+  }).join('\n\n');
 
   // ── View descriptions ──
   var viewLabels = {
@@ -3350,94 +3344,42 @@ function _builderRenderPrompt() {
     comparison:   'Month-over-Month comparison table'
   };
   var viewList = views.length
-    ? views.map(function(v){ return '- ' + (viewLabels[v] || v); }).join('
-')
+    ? views.map(function(v){ return '- ' + (viewLabels[v] || v); }).join('\n')
     : '- Summary KPI Cards (default)';
 
-  var prompt = 'You are building a RevOps dashboard called "' + name + '" for Sprout Solutions using Databricks SQL (shared.revops schema).
-
-'
-    + '## Dashboard Configuration
-'
-    + '- Dashboard Name: ' + name + '
-'
-    + (fromDate ? '- Date From: ' + fromDate + '
-' : '')
-    + (toDate   ? '- Date To:   ' + toDate   + '
-' : '')
-    + (segments.length   ? '- Segments:  ' + segments.join(', ')   + '
-' : '')
-    + (pipelines.length  ? '- Pipelines: ' + pipelines.join(', ')  + '
-' : '- Pipelines: All
-')
-    + (sources.length    ? '- Lead Source: ' + sources.join(', ')  + '
-' : '')
-    + (industries.length ? '- Industries: ' + industries.join(', ') + '
-' : '')
-    + (rep.trim()        ? '- Sales Reps: ' + rep + '
-' : '')
-    + (team.trim()       ? '- Team: ' + team + '
-' : '')
-    + '
-## Views to Include
-' + viewList + '
-
-'
-    + '## Metrics to Include
-
-' + mBlock + '
-
-'
-    + '## Global SQL Filters (apply to ALL queries)
-'
-    + '```sql
-'
-    + '-- Date filter
-' + dateSQL + '
-'
-    + '-- Pipeline
-' + pipeSQL + '
-'
-    + (segSQL    ? '-- Segment
-'      + segSQL    + '
-' : '')
-    + (sourceSQL ? '-- Lead Source
-'  + sourceSQL + '
-' : '')
-    + (indSQL    ? '-- Industry
-'     + indSQL    + '
-' : '')
-    + (repSQL    ? '-- Sales Rep
-'    + repSQL    + '
-' : '')
-    + (teamSQL   ? '-- Team
-'         + teamSQL   + '
-' : '')
-    + "-- Exclude renewals (always)
-AND deal_type NOT IN ('Renewal','Upsell - Renewal') AND LOWER(deal_name) NOT LIKE '%renewal%'
-```
-
-"
-    + '## Build Instructions
-'
-    + '1. Use Databricks SQL: USE CATALOG shared; USE SCHEMA revops;
-'
-    + '2. Apply ALL global filters above to every query
-'
-    + '3. Build as a single self-contained HTML file:
-'
-    + '   - Dark theme (#030712 bg, #1DB954 accent, white text)
-'
-    + '   - Responsive grid layout
-'
-    + '   - Executive-level professional design
-'
-    + '   - Header showing dashboard name, date range, and filters applied
-'
-    + '4. Include each requested view as a clearly labeled section
-'
-    + '5. Use Chart.js (CDN) for charts
-'
+  var prompt = 'You are building a RevOps dashboard called "' + name + '" for Sprout Solutions using Databricks SQL (shared.revops schema).\n\n'
+    + '## Dashboard Configuration\n'
+    + '- Dashboard Name: ' + name + '\n'
+    + (fromDate ? '- Date From: ' + fromDate + '\n' : '')
+    + (toDate   ? '- Date To:   ' + toDate   + '\n' : '')
+    + (segments.length   ? '- Segments:  ' + segments.join(', ')   + '\n' : '')
+    + (pipelines.length  ? '- Pipelines: ' + pipelines.join(', ')  + '\n' : '- Pipelines: All\n')
+    + (sources.length    ? '- Lead Source: ' + sources.join(', ')  + '\n' : '')
+    + (industries.length ? '- Industries: ' + industries.join(', ') + '\n' : '')
+    + (rep.trim()        ? '- Sales Reps: ' + rep + '\n' : '')
+    + (team.trim()       ? '- Team: ' + team + '\n' : '')
+    + '\n## Views to Include\n' + viewList + '\n\n'
+    + '## Metrics to Include\n\n' + mBlock + '\n\n'
+    + '## Global SQL Filters (apply to ALL queries)\n'
+    + '```sql\n'
+    + '-- Date filter\n' + dateSQL + '\n'
+    + '-- Pipeline\n' + pipeSQL + '\n'
+    + (segSQL    ? '-- Segment\n'     + segSQL    + '\n' : '')
+    + (sourceSQL ? '-- Lead Source\n' + sourceSQL + '\n' : '')
+    + (indSQL    ? '-- Industry\n'    + indSQL    + '\n' : '')
+    + (repSQL    ? '-- Sales Rep\n'   + repSQL    + '\n' : '')
+    + (teamSQL   ? '-- Team\n'        + teamSQL   + '\n' : '')
+    + "-- Exclude renewals (always)\nAND deal_type NOT IN ('Renewal','Upsell - Renewal') AND LOWER(deal_name) NOT LIKE '%renewal%'\n```\n\n"
+    + '## Build Instructions\n'
+    + '1. Use Databricks SQL: USE CATALOG shared; USE SCHEMA revops;\n'
+    + '2. Apply ALL global filters above to every query\n'
+    + '3. Build as a single self-contained HTML file:\n'
+    + '   - Dark theme (#030712 bg, #1DB954 accent, white text)\n'
+    + '   - Responsive grid layout\n'
+    + '   - Executive-level professional design\n'
+    + '   - Header showing dashboard name, date range, and filters applied\n'
+    + '4. Include each requested view as a clearly labeled section\n'
+    + '5. Use Chart.js (CDN) for charts\n'
     + '6. Exact metric definitions and SQL are provided above — do not change business logic';
 
   var ta = document.getElementById('builder-prompt-output');
