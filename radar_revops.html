@@ -1843,55 +1843,89 @@ python fetch_data.py
 
         <!-- SECTION B: Update / Iterate -->
         <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:24px">
-          <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:4px;display:flex;align-items:center;gap:8px">
-            ✏️ Step B — Update Layouts, Add Metrics or Visuals
-            <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.3px">Continue in the same Claude conversation</span>
+          <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:4px">
+            ✏️ Step B — Update Your Dashboard
           </div>
-          <p style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:14px;line-height:1.6">Stay in the <strong style="color:rgba(255,255,255,.6)">same Claude conversation</strong> where you pasted the original prompt — Claude already knows your table schemas, DataPedia definitions, metric formulas, and the dashboard code it just built. No need to re-explain anything.</p>
+          <p style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px;line-height:1.6">Always stay in the <strong style="color:rgba(255,255,255,.7)">same Claude conversation</strong> where you built the dashboard — Claude already knows your data, metrics, and the code it wrote. How you ask depends on what you need:</p>
 
-          <div class="github-steps">
-            <div class="github-step">
-              <div class="github-num">1</div>
-              <div class="github-body">
-                <div class="github-title">Stay in the same Claude conversation — just send a follow-up</div>
-                <div class="github-desc">Claude already has full context: your pipeline, metric definitions, table schemas, and the <code>dashboard.html</code> it generated. Just tell it what you want to change — no need to paste the file again or re-explain the data.</div>
+          <!-- Two-path cards -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+
+            <!-- Path A: Just ask -->
+            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px">
+              <div style="font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+                💬 Just type it in chat
+              </div>
+              <p style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:10px;line-height:1.6">For quick tweaks — no generator needed. Just send a message in the same conversation.</p>
+              <div style="font-size:11px;color:rgba(255,255,255,.35);line-height:1.9">
+                ✦ Change chart type or layout<br>
+                ✦ Move or resize a section<br>
+                ✦ Change colors or formatting<br>
+                ✦ Show numbers in ₱ format<br>
+                ✦ Add a filter for an existing column<br>
+                ✦ Highlight values above/below a threshold<br>
+                ✦ Fix something that looks wrong
               </div>
             </div>
 
-            <div class="github-step">
-              <div class="github-num">2</div>
-              <div class="github-body">
-                <div class="github-title">Tell Claude exactly what to change</div>
-                <div class="github-desc">Be specific — Claude updates only what you ask and keeps everything else intact. Examples:</div>
-                <div class="github-code" style="margin-top:8px">"Add a bar chart showing Won MRR by month for the last 12 months"
-"Add a Sales Rep breakdown table below the KPI cards"
-"Add a Pipeline MRR scorecard next to the Win Rate card"
-"Change the layout to 2 columns on desktop"
-"Add a filter dropdown for Segment (SME / ENT)"
-"Show MRR in ₱ PHP format instead of plain numbers"
-"Highlight any KPI card where actual is below target in red"</div>
+            <!-- Path B: Use generator -->
+            <div style="background:rgba(29,185,84,.04);border:1px solid rgba(29,185,84,.2);border-radius:12px;padding:16px">
+              <div style="font-size:12px;font-weight:700;color:#1DB954;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+                🔄 Use the Update Request generator
+              </div>
+              <p style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:10px;line-height:1.6">When you need Claude to follow the exact business definition — the generator includes the right references automatically.</p>
+              <div style="font-size:11px;color:rgba(255,255,255,.35);line-height:1.9">
+                ✦ Adding a <strong style="color:rgba(255,255,255,.5)">new metric</strong> not in your original selection<br>
+                ✦ Changing how a metric is <strong style="color:rgba(255,255,255,.5)">calculated</strong><br>
+                ✦ Adding a metric with <strong style="color:rgba(255,255,255,.5)">specific date logic</strong> (e.g. create_date vs close_date)<br>
+                ✦ Anything where the <strong style="color:rgba(255,255,255,.5)">DataPedia definition matters</strong>
               </div>
             </div>
 
-            <div class="github-step">
-              <div class="github-num">3</div>
-              <div class="github-body">
-                <div class="github-title">Download the updated <code>dashboard.html</code> artifact</div>
-                <div class="github-desc">Claude returns an updated artifact. Download it and replace your existing <code>dashboard.html</code> in your project folder. No need to re-run <code>fetch_data.py</code> — the data file stays the same.</div>
-              </div>
-            </div>
-
-            <div class="github-step">
-              <div class="github-num">4</div>
-              <div class="github-body">
-                <div class="github-title">Hard refresh your browser to see the changes</div>
-                <div class="github-desc">Press <strong>Ctrl + Shift + R</strong> (Windows) or <strong>Cmd + Shift + R</strong> (Mac). If published on GitHub Pages, push the updated file and wait ~1 minute for the page to redeploy.</div>
-              </div>
-            </div>
           </div>
 
-          <div style="margin-top:16px;padding:14px 16px;background:rgba(29,185,84,.05);border:1px solid rgba(29,185,84,.15);border-radius:10px;font-size:12px;color:rgba(255,255,255,.5);line-height:1.7">
-            💡 <strong style="color:rgba(255,255,255,.7)">Why the same conversation?</strong> The original prompt you pasted includes your full table schemas, DataPedia metric definitions, SQL logic, and the generated <code>dashboard.html</code> — all of it lives in Claude's context. Continuing in the same thread means Claude already knows your business rules and won't make assumptions or break existing logic when you ask for changes.
+          <!-- Update Request Generator -->
+          <div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px">
+            <div style="font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:2px">🔄 Update Request Generator</div>
+            <p style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:16px">Generates a follow-up prompt to paste in the same Claude conversation. Automatically includes DataPedia definitions for any new metrics you select.</p>
+
+            <!-- What to change -->
+            <div class="builder-field" style="margin-bottom:14px">
+              <label class="builder-label">What do you want to add or change? <span style="font-weight:400;color:rgba(255,255,255,.3)">(describe it in plain English)</span></label>
+              <textarea id="upd-request" class="bd-notes-textarea" style="min-height:72px" placeholder="e.g. Add a Won Deals trend line chart below the MRR card. Also show a breakdown table by Sales Rep with MRR and Deal Count columns."></textarea>
+            </div>
+
+            <!-- New metrics toggle -->
+            <div style="margin-bottom:14px">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
+                <input type="checkbox" id="upd-has-new-metrics" onchange="updToggleMetrics()" style="width:15px;height:15px;accent-color:#1DB954;cursor:pointer">
+                <span style="font-size:12px;color:rgba(255,255,255,.6)">I'm adding a <strong>new metric</strong> that wasn't in my original selection</span>
+              </label>
+            </div>
+
+            <!-- Metric picker (hidden until toggled) -->
+            <div id="upd-metric-picker" style="display:none;margin-bottom:16px;padding:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px">
+              <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:10px">Select the new metric(s) to add — their DataPedia definitions will be included in the generated prompt:</div>
+              <input type="text" id="upd-metric-search" class="builder-input" placeholder="Search metrics..." oninput="updFilterMetrics()" style="margin-bottom:10px;font-size:12px">
+              <div id="upd-metric-list" class="bd-check-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
+            </div>
+
+            <!-- Generate button -->
+            <button onclick="updGenerate()" style="background:#1DB954;color:#000;font-weight:700;font-size:12px;padding:9px 20px;border:none;border-radius:8px;cursor:pointer;letter-spacing:.3px;margin-bottom:14px">⚡ Generate Update Prompt</button>
+
+            <!-- Output -->
+            <div id="upd-output-wrap" style="display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                <span style="font-size:11px;color:rgba(255,255,255,.4)">Paste this into the same Claude conversation 👇</span>
+                <button id="upd-copy-btn" onclick="updCopy()" style="background:rgba(255,255,255,.08);color:#e2e8f0;font-size:11px;font-weight:600;padding:5px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer">📋 Copy</button>
+              </div>
+              <textarea id="upd-output" readonly class="builder-prompt-textarea" style="min-height:160px;font-size:11px"></textarea>
+            </div>
+          </div>
+
+          <!-- After updating -->
+          <div style="margin-top:16px;padding:14px 16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;font-size:12px;color:rgba(255,255,255,.4);line-height:1.7">
+            After Claude sends the updated artifact → download <code>dashboard.html</code>, replace the file in your folder, then press <strong>Ctrl + Shift + R</strong> to refresh. If on GitHub Pages, push the file and wait ~1 min.
           </div>
         </div>
 
@@ -4397,6 +4431,110 @@ function builderCopyPrompt() {
     setTimeout(function(){btn.textContent='Copy Prompt';},2000);
   });
 }
+
+// ── UPDATE REQUEST GENERATOR ───────────────────────────────────────────────
+var _updMetricsPainted = false;
+
+function updToggleMetrics() {
+  var cb  = document.getElementById('upd-has-new-metrics');
+  var box = document.getElementById('upd-metric-picker');
+  if (!cb || !box) return;
+  box.style.display = cb.checked ? 'block' : 'none';
+  if (cb.checked && !_updMetricsPainted) { _updPaintMetrics(); _updMetricsPainted = true; }
+}
+
+function _updPaintMetrics() {
+  var list = document.getElementById('upd-metric-list');
+  if (!list) return;
+  var metrics = _getBuilderMetrics ? _getBuilderMetrics() : (typeof METRICS !== 'undefined' ? METRICS : []);
+  list.innerHTML = metrics.map(function(m) {
+    return '<label class="bd-check-item" style="padding:5px 0">'
+      + '<input type="checkbox" value="' + m.name.replace(/"/g,'&quot;') + '" data-id="' + (m.id||'') + '"> '
+      + '<span>' + m.name + '</span>'
+      + ' <span class="bd-col-tag" style="margin-left:4px">' + (m.category||'') + '</span>'
+      + '</label>';
+  }).join('');
+}
+
+function updFilterMetrics() {
+  var q = (document.getElementById('upd-metric-search')||{}).value || '';
+  q = q.toLowerCase();
+  var list = document.getElementById('upd-metric-list');
+  if (!list) return;
+  list.querySelectorAll('label.bd-check-item').forEach(function(lbl) {
+    lbl.style.display = lbl.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function updGenerate() {
+  var request = ((document.getElementById('upd-request')||{}).value || '').trim();
+  if (!request) {
+    alert('Please describe what you want to add or change first.');
+    return;
+  }
+
+  var hasNew = (document.getElementById('upd-has-new-metrics')||{}).checked;
+  var newMetricDefs = '';
+
+  if (hasNew) {
+    var list = document.getElementById('upd-metric-list');
+    var checked = list ? list.querySelectorAll('input[type=checkbox]:checked') : [];
+    if (checked.length > 0) {
+      var metrics = _getBuilderMetrics ? _getBuilderMetrics() : (typeof METRICS !== 'undefined' ? METRICS : []);
+      var defLines = [];
+      checked.forEach(function(cb) {
+        var mName = cb.value;
+        var m = metrics.find(function(x){ return x.name === mName; });
+        if (m) {
+          var block = '📊 ' + m.name + '\n'
+            + '  Definition:  ' + (m.definition || '—') + '\n'
+            + '  Formula:     ' + (m.formula || '—') + '\n'
+            + (m.filters  ? '  Filters:     ' + m.filters  + '\n' : '')
+            + (m.sql      ? '  SQL hint:    ' + m.sql      + '\n' : '')
+            + (m.notes    ? '  Notes:       ' + m.notes    + '\n' : '');
+          defLines.push(block);
+        }
+      });
+      if (defLines.length) {
+        newMetricDefs = '\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+          + '📖 NEW METRIC DEFINITIONS (from DataPedia — follow exactly, do not change formulas)\n'
+          + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+          + defLines.join('\n');
+      }
+    }
+  }
+
+  var out = 'In the same dashboard you just built, please make the following update:\n\n'
+    + request
+    + newMetricDefs
+    + '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    + '⚠️  IMPORTANT\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    + '• Update the dashboard.html artifact only — keep all existing metrics, layout, and filters intact unless I specifically asked to change them.\n'
+    + '• Follow all existing data rules (exclude renewals, use department_source_clean, segment MICRO → SME).\n'
+    + '• If adding a new metric, use the DataPedia definition above — do not invent a formula.\n'
+    + '• Return the full updated dashboard.html as a downloadable artifact.';
+
+  var wrap = document.getElementById('upd-output-wrap');
+  var ta   = document.getElementById('upd-output');
+  if (wrap) wrap.style.display = 'block';
+  if (ta)   ta.value = out;
+}
+
+function updCopy() {
+  var ta  = document.getElementById('upd-output');
+  var btn = document.getElementById('upd-copy-btn');
+  if (!ta || !btn) return;
+  navigator.clipboard.writeText(ta.value).then(function(){
+    btn.textContent = '✅ Copied!';
+    setTimeout(function(){ btn.textContent = '📋 Copy'; }, 2000);
+  }).catch(function(){
+    ta.select(); document.execCommand('copy');
+    btn.textContent = '✅ Copied!';
+    setTimeout(function(){ btn.textContent = '📋 Copy'; }, 2000);
+  });
+}
+// ── END UPDATE REQUEST GENERATOR ───────────────────────────────────────────
 
 function _builderInitAll() {
   if (_builderInited) return;
