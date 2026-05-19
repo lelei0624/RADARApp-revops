@@ -649,10 +649,10 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
 
   <!-- Sub-tabs -->
   <div class="plan-subtabs">
-    <div class="plan-subtab" id="ptab-sql" class="plan-subtab active" onclick="setPlanTab('sql')">💾 SQL Templates</div>
-    <div class="plan-subtab" id="ptab-filters" onclick="setPlanTab('filters')">🔧 Filters</div>
-    <div class="plan-subtab" id="ptab-diy" onclick="setPlanTab('diy')">🛠️ DIY Dashboard</div>
-    <div class="plan-subtab" id="ptab-build" onclick="setPlanTab('build')">📤 How to Publish</div>
+    <div class="plan-subtab active" id="ptab-diy"   onclick="setPlanTab('diy')">🛠️ DIY Dashboard</div>
+    <div class="plan-subtab" id="ptab-build"         onclick="setPlanTab('build')">📤 How to Publish</div>
+    <div class="plan-subtab" id="ptab-filters"       onclick="setPlanTab('filters')">🔧 Filters</div>
+    <div class="plan-subtab" id="ptab-sql"           onclick="setPlanTab('sql')">💾 SQL Templates</div>
   </div>
 
   <div class="plan-body">
@@ -664,7 +664,7 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
     
 
     <!-- ── SQL TEMPLATES ── -->
-    <div class="plan-section active" id="plan-sql">
+    <div class="plan-section" id="plan-sql">
       <div class="plan-h2">💾 SQL Templates — 26 Reference Queries</div>
       <p style="font-size:12px;color:#636E72;margin-bottom:6px">All queries use Databricks SQL syntax against <code style="font-size:11px">shared.revops</code>.</p>
       <div class="info-box" style="margin-bottom:18px"><strong>💡 Tip:</strong> Copy any query and paste it into Claude alongside your dashboard request. Claude will use these as the reference logic to calculate metrics correctly — no need to re-explain the business rules.</div>
@@ -1209,7 +1209,7 @@ DATABRICKS_TOKEN</div>
     </div><!-- /plan-build -->
 
   
-    <div class="plan-section" id="plan-diy">
+    <div class="plan-section active" id="plan-diy">
   <div class="builder-hero">
     <h1>🛠️ DIY Dashboard Builder</h1>
     <p>Select the metrics you need, configure your dashboard settings, and get a ready-to-use Claude prompt with exact DataPedia definitions, SQL templates, and filters — then publish it to GitHub Pages or Vercel.</p>
