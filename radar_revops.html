@@ -1676,6 +1676,8 @@ DATABRICKS_TOKEN</div>
           <label class="bd-view-card"><input type="checkbox" value="funnel" onchange="bdViewToggle(this)"><span class="bd-view-icon">🔽</span><span class="bd-view-label">Funnel Breakdown</span></label>
           <label class="bd-view-card"><input type="checkbox" value="leaderboard" onchange="bdViewToggle(this)"><span class="bd-view-icon">🏆</span><span class="bd-view-label">Leaderboard</span></label>
           <label class="bd-view-card"><input type="checkbox" value="comparison" onchange="bdViewToggle(this)"><span class="bd-view-icon">⚖️</span><span class="bd-view-label">MoM Comparison</span></label>
+          <label class="bd-view-card"><input type="checkbox" value="table" onchange="bdViewToggle(this)"><span class="bd-view-icon">📋</span><span class="bd-view-label">Data Table</span></label>
+          <label class="bd-view-card"><input type="checkbox" value="distribution" onchange="bdViewToggle(this)"><span class="bd-view-icon">🥧</span><span class="bd-view-label">Distribution Charts</span></label>
         </div>
       </div>
 
@@ -3231,7 +3233,6 @@ function builderGoStep(n) {
   var _domCount = document.querySelectorAll('#builder-metrics-grid input[type=checkbox]:checked').length;
   if (n===2 && _domCount===0) return;
   if (n===2) _builderRenderChips();
-  if (n===3) _builderRenderPrompt();
   if (n===1) {
     _builderSelectedIds = new Set();
     document.querySelectorAll('#builder-metrics-grid .builder-mrow').forEach(function(r) {
@@ -3253,6 +3254,7 @@ function builderGoStep(n) {
   }
   var c = document.querySelector('.content-area');
   if (c) c.scrollTop = 0;
+  if (n===3) _builderRenderPrompt();
 }
 
 function _builderRenderChips() {
@@ -3377,13 +3379,15 @@ function _builderRenderPrompt() {
     trend:        'Trend / Time-series charts (MoM, WoW)',
     funnel:       'Funnel visualization (lead → SQL → won)',
     leaderboard:  'Leaderboard ranking (rep/team performance)',
-    comparison:   'Month-over-Month comparison table'
+    comparison:   'Month-over-Month comparison table',
+    table:        'Data Table (raw/filtered records in sortable table)',
+    distribution: 'Distribution Charts (breakdown by segment, industry, etc.)'
   };
   var viewList = views.length
     ? views.map(function(v){ return '- ' + (viewLabels[v] || v); }).join('\n')
     : '- Summary KPI Cards (default)';
 
-  var prompt = 'You are building a RevOps dashboard called "' + name + '" for Sprout Solutions using Databricks SQL (shared.revops schema).\n\n'
+  var _promptText = 'You are building a RevOps dashboard called "' + name + '" for Sprout Solutions using Databricks SQL (shared.revops schema).\n\n'
     + '## Dashboard Configuration\n'
     + '- Dashboard Name: ' + name + '\n'
     + (_dateScope === 'specific' && fromDate ? '- Date From: ' + fromDate + '\n' : '')
@@ -3413,7 +3417,7 @@ function _builderRenderPrompt() {
     + '6. Exact metric definitions and SQL are provided above — do not change business logic';
 
   var ta = document.getElementById('builder-prompt-output');
-  if (ta) ta.value = prompt;
+  if (ta) ta.value = _promptText;
 }
 
 function builderCopyPrompt() {
