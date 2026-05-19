@@ -1412,7 +1412,7 @@ DATABRICKS_TOKEN</div>
   </div>
 
   <!-- Step Indicator -->
-  <!-- BUILDER v20260519c -->
+  <!-- BUILDER v20260519d -->
   <div class="builder-steps-indicator">
     <div class="builder-step-dot active" id="bsi-1">
       <span class="bsi-num">1</span>
@@ -1434,7 +1434,7 @@ DATABRICKS_TOKEN</div>
   <div class="builder-step-panel active" id="builder-step-1">
     <div class="builder-panel-header">
       <div>
-        <div class="builder-panel-title">Step 1 of 3 — Select Metrics <span style="font-size:10px;opacity:.4;font-weight:400">v20260519c</span></div>
+        <div class="builder-panel-title">Step 1 of 3 — Select Metrics <span style="font-size:10px;opacity:.4;font-weight:400">v20260519d</span></div>
         <div class="builder-panel-sub">Choose the metrics to include in your dashboard. Selected metrics will be included with their exact definitions, formulas, and SQL logic.</div>
       </div>
       <div class="builder-selected-count" id="builder-selected-count">0 metrics selected</div>
@@ -1448,6 +1448,7 @@ DATABRICKS_TOKEN</div>
       <div class="builder-cat-filters" id="builder-cat-filters"></div>
     </div>
 
+    <div id="builder-debug" style="font-size:10px;color:#f59e0b;padding:2px 24px 0;min-height:14px"></div>
     <div class="builder-metrics-grid" id="builder-metrics-grid">
 <div class="builder-mrow" data-cat="Funnel" data-n="DQ Rate" data-name="dq rate" data-def="% of leads marked disqualified"><input type="checkbox"><div class="builder-mrow-info"><div class="builder-mrow-name">DQ Rate</div><div class="builder-mrow-meta"><span class="builder-mrow-cat">Funnel</span><span class="builder-mrow-def">% of leads marked Disqualified</span></div></div></div>
 <div class="builder-mrow" data-cat="Funnel" data-n="Lead to Won Conversion %" data-name="lead to won conversion %" data-def="percentage of total leads that convert into closed-won deals."><input type="checkbox"><div class="builder-mrow-info"><div class="builder-mrow-name">Lead to Won Conversion %</div><div class="builder-mrow-meta"><span class="builder-mrow-cat">Funnel</span><span class="builder-mrow-def">Percentage of total leads that convert into Closed-Won deals.</span></div></div></div>
@@ -1479,6 +1480,35 @@ DATABRICKS_TOKEN</div>
 <div class="builder-mrow" data-cat="Sales_Productivity" data-n="Weighted Pipeline MRR" data-name="weighted pipeline mrr" data-def="expected pipeline revenue based on deal probability"><input type="checkbox"><div class="builder-mrow-info"><div class="builder-mrow-name">Weighted Pipeline MRR</div><div class="builder-mrow-meta"><span class="builder-mrow-cat">Sales</span><span class="builder-mrow-def">Expected pipeline revenue based on deal probability</span></div></div></div>
 <div class="builder-mrow" data-cat="Sales_Productivity" data-n="Won Deals" data-name="won deals" data-def="deals completed with a signed proposal"><input type="checkbox"><div class="builder-mrow-info"><div class="builder-mrow-name">Won Deals</div><div class="builder-mrow-meta"><span class="builder-mrow-cat">Sales</span><span class="builder-mrow-def">Deals completed with a signed proposal</span></div></div></div>
 </div>
+<script>
+(function(){
+  var grid = document.getElementById('builder-metrics-grid');
+  var dbg  = document.getElementById('builder-debug');
+  if (!grid) { if (dbg) dbg.textContent = 'ERR: grid not found'; return; }
+  if (dbg) dbg.textContent = 'v4 ready';
+  grid.addEventListener('click', function(e) {
+    // Walk up to find .builder-mrow
+    var row = e.target;
+    while (row && row !== grid) {
+      if (row.className && row.className.indexOf('builder-mrow') >= 0) break;
+      row = row.parentNode;
+    }
+    if (!row || row === grid) return;
+    var cb = row.querySelector('input[type=checkbox]');
+    if (!cb) return;
+    // Toggle checkbox if user didn't click it directly
+    if (e.target.tagName !== 'INPUT') cb.checked = !cb.checked;
+    // Count all checked boxes in grid
+    var n = grid.querySelectorAll('input[type=checkbox]:checked').length;
+    var countEl = document.getElementById('builder-selected-count');
+    if (countEl) countEl.textContent = n + ' metric' + (n !== 1 ? 's' : '') + ' selected';
+    var btn = document.getElementById('builder-next-1');
+    if (btn) btn.disabled = n === 0;
+    row.classList.toggle('selected', cb.checked);
+    if (dbg) dbg.textContent = 'v4: ' + n + ' selected';
+  });
+})();
+</script>
 
     <div class="builder-footer">
       <div></div>
@@ -3002,6 +3032,7 @@ renderDashboards();
 // ── DASHBOARD BUILDER ──
 var _builderSelectedIds = new Set();
 var _builderActiveCat   = '';
+var _builderSearchVal   = '';
 var _builderInited      = false;
 var BUILDER_CATS = ['All','Funnel','Revenue','Sales_Productivity','Marketing_Efficiency','Product_Performance'];
 var BUILDER_CAT_LABELS = {All:'All',Finance:'Finance',Funnel:'Funnel',Revenue:'Revenue',Sales_Productivity:'Sales',Marketing_Efficiency:'Marketing',Product_Performance:'Product'};
