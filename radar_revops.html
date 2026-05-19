@@ -413,6 +413,9 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
 .builder-select:focus{border-color:#1DB954}
 .builder-select option{background:#0d1628;color:#e2e8f0}
 .builder-selected-summary{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px}
+.bd-notes-textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e2e8f0;font-size:12px;font-family:inherit;padding:10px 12px;resize:vertical;min-height:80px;line-height:1.6;outline:none;transition:border-color .15s}
+.bd-notes-textarea:focus{border-color:rgba(29,185,84,.4)}
+.bd-notes-textarea::placeholder{color:rgba(255,255,255,.25)}
 .builder-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:24px}
 .builder-chip{background:rgba(29,185,84,.12);border:1px solid rgba(29,185,84,.25);color:#6EE7B7;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
 .builder-prompt-textarea{width:100%;height:420px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:16px;font-family:"Courier New",monospace;font-size:11px;color:#6EE7B7;line-height:1.65;resize:vertical;outline:none}
@@ -1685,6 +1688,12 @@ DATABRICKS_TOKEN</div>
       <div class="builder-selected-summary">
         <div class="builder-label" style="margin-bottom:8px">Selected Metrics</div>
         <div class="builder-chips" id="builder-chips"></div>
+      </div>
+
+      <!-- Additional Notes -->
+      <div class="bd-section" style="margin-top:16px">
+        <div class="bd-section-title">Additional Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:rgba(255,255,255,.3)">Anything else the dashboard should take note of</span></div>
+        <textarea class="bd-notes-textarea" id="bd-notes" placeholder="e.g. Show MRR in PHP currency format. Highlight deals above ₱50K MRR. Add a note that data refreshes 3x daily. Include a footer with the team name..."></textarea>
       </div>
 
     </div>
@@ -3333,6 +3342,7 @@ function _builderRenderPrompt() {
   var sources    = getChecked('bd-source-group');
   var subFilters = getChecked('bd-subfilter-group');
   var views      = getChecked('bd-views-group');
+  var notes      = ((document.getElementById('bd-notes')||{}).value || '').trim();
 
   // ── Build SQL filter block ──
   var dateSQL = fromDate && toDate
@@ -3460,9 +3470,12 @@ function _builderRenderPrompt() {
     + 'Status: 🟢 Live (JSON loaded) / ⚠️ Sample Data (file missing)\n'
     + 'Sample fallback: realistic dummy values so dashboard always renders.\n\n'
     + 'DATE-COLUMN RULES (STRICT — never mix):\n'
-    + '  Funnel / Lead counts  → create_date\n'
-    + '  Won / Revenue metrics → close_date\n'
-    + '  Pipeline MRR          → projected_close_date\n\n'
+    + '  📌 Lead Metrics (MQL, SQL, SQL%, lead counts)\n'
+    + '     → Always filter by CREATE DATE (create_date)\n\n'
+    + '  📌 Revenue & Win Metrics (MRR, Won Deals, Win Rate, Deal Velocity, Avg Deal Value)\n'
+    + '     → Always filter by CLOSED-WON DATE (close_date)\n\n'
+    + '  📌 Pipeline Metrics (Pipeline MRR, Forecast)\n'
+    + '     → Always filter by PROJECTED CLOSE DATE (projected_close_date)\n\n'
     + 'FILTERS IN DASHBOARD:\n'
     + '  • Date filter style: ' + _dateStyleLine + '\n'
     + (_dateScope==='specific' && fromDate ? '  • Default date range: ' + fromDate + ' to ' + (toDate||'') + '\n' : '  • Default: All Data\n')
@@ -3531,6 +3544,10 @@ function _builderRenderPrompt() {
     + '• Views to include:       ' + _viewListFill + '\n'
     + (subFilters.length ? '• Filter dimensions:     ' + subFilters.join(', ') + '\n' : '')
     + '\n'
+    + (notes ? '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    + '📝 ADDITIONAL NOTES / SPECIAL INSTRUCTIONS\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    + notes + '\n\n' : '')
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     + '🔒 GLOBAL SQL FILTERS (apply to ALL queries in fetch_data.py)\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
