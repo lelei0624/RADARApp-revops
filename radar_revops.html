@@ -390,8 +390,8 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
 .builder-mcard{background:rgba(255,255,255,.03);border-radius:10px;border:1.5px solid rgba(255,255,255,.07);padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .builder-mcard:hover{border-color:rgba(29,185,84,.3);background:rgba(29,185,84,.04)}
 .builder-mcard.selected{border-color:#1DB954;background:rgba(29,185,84,.08);box-shadow:0 0 0 1px rgba(29,185,84,.2),0 4px 16px rgba(29,185,84,.1)}
-.builder-mcard-check{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:4px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:11px;color:transparent}
-.builder-mcard.selected .builder-mcard-check{background:#1DB954;border-color:#1DB954;color:#fff}
+.builder-mcard-check{position:absolute;top:10px;right:10px}
+.builder-mcard-check input[type=checkbox]{width:16px;height:16px;accent-color:#1DB954;cursor:pointer;border-radius:4px}
 .builder-mcard-name{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:5px;padding-right:24px;line-height:1.3}
 .builder-mcard-cat{display:inline-block;margin-bottom:5px}
 .builder-mcard-def{font-size:11px;color:rgba(255,255,255,.4);line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -3004,7 +3004,7 @@ function _builderRenderMetrics(metrics) {
     var catLabel = BUILDER_CAT_LABELS[m.category] || m.category || '';
     var safeN = JSON.stringify(m.name);
     return '<div class="builder-mcard' + (sel?' selected':'') + '" onclick="builderToggleMetric(' + safeN + ')">' +
-      '<div class="builder-mcard-check">' + (sel?'&#10003;':'') + '</div>' +
+      '<div class="builder-mcard-check"><input type="checkbox"' + (sel?' checked':'') + ' onclick="event.stopPropagation();builderToggleMetric(' + safeN + ')"></div>' +
       '<div class="builder-mcard-name">' + (m.name||'') + '</div>' +
       '<div class="builder-mcard-cat"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(29,185,84,.15);color:#1DB954;border:1px solid rgba(29,185,84,.3)">' + catLabel + '</span></div>' +
       '<div class="builder-mcard-def">' + (m.definition||'') + '</div>' +
