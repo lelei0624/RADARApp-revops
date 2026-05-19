@@ -664,7 +664,7 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
 
     <!-- ── SQL TEMPLATES ── -->
     <div class="plan-section active" id="plan-sql">
-      <div class="plan-h2">💾 SQL Templates — 22 Reference Queries</div>
+      <div class="plan-h2">💾 SQL Templates — 23 Reference Queries</div>
       <p style="font-size:12px;color:#636E72;margin-bottom:6px">All queries use Databricks SQL syntax against <code style="font-size:11px">shared.revops</code>.</p>
       <div class="info-box" style="margin-bottom:18px"><strong>💡 Tip:</strong> Copy any query and paste it into Claude alongside your dashboard request. Claude will use these as the reference logic to calculate metrics correctly — no need to re-explain the business rules.</div>
 
@@ -2862,7 +2862,153 @@ SELECT
   avg_deal_velocity,
   mrr_in_pipeline
 FROM shared.revops.gold_monthly_exec_summary
-ORDER BY metric_month DESC, pipeline_name, segment;` }];
+ORDER BY metric_month DESC, pipeline_name, segment;` },
+
+  { title: '🏗️ gold_monthly_exec_summary — Full CREATE TABLE SQL', sql: `-- ══════════════════════════════════════════════════════════════════
+-- TABLE: shared.revops.gold_monthly_exec_summary
+-- GRAIN: 1 row per metric_month × pipeline_name × segment × department_source_clean
+-- DATE BASIS:
+--   qualified_leads / sales_qualified_leads / dq_leads → create_date
+--   won_* / lost_deals / win_rate / avg_deal_* → close_date
+--   mrr_in_pipeline → projected_close_date
+-- COLUMNS:
+--   metric_month, pipeline_name, segment, department_source_clean
+--   qualified_leads, sales_qualified_leads, won_deals, lost_deals, dq_leads
+--   sql_pct, win_rate, dq_rate
+--   won_amount, won_mrr, won_ef_mrr, won_otp_only, won_mrr_lt_12, won_implem_fee
+--   avg_deal_size, avg_deal_velocity, mrr_in_pipeline
+-- ══════════════════════════════════════════════════════════════════
+USE CATALOG shared;
+USE SCHEMA revops;
+
+CREATE OR REPLACE TABLE shared.revops.gold_monthly_exec_summary AS
+
+WITH availed_deals AS (
+    SELECT DISTINCT deal_id
+    FROM shared.revops.silver_line_items
+    WHERE product_status = 'Availed'
+),
+
+ql AS (
+    SELECT
+        DATE_TRUNC('month', create_date) AS metric_month,
+        pipeline_name, segment, department_source_clean,
+        COUNT(DISTINCT deal_id) AS qualified_leads
+    FROM shared.revops.silver_deals
+    WHERE qualified_lead = 'Yes'
+      AND LOWER(deal_name) NOT LIKE '%renewal%'
+    GROUP BY 1,2,3,4
+),
+
+sqls AS (
+    SELECT
+        DATE_TRUNC('month', create_date) AS metric_month,
+        pipeline_name, segment, department_source_clean,
+        COUNT(DISTINCT deal_id) AS sales_qualified_leads
+    FROM shared.revops.silver_deals
+    WHERE qualified_lead = 'Yes'
+      AND client_journey_stage <> 'MQL'
+      AND LOWER(deal_name) NOT LIKE '%renewal%'
+    GROUP BY 1,2,3,4
+),
+
+won_lost_bookings AS (
+    SELECT
+        DATE_TRUNC('month', close_date) AS metric_month,
+        pipeline_name, segment, department_source_clean,
+        COUNT(DISTINCT CASE WHEN client_journey_stage = 'Customer'    THEN deal_id END) AS won_deals,
+        COUNT(DISTINCT CASE WHEN client_journey_stage = 'Closed Lost' THEN deal_id END) AS lost_deals,
+        SUM(CASE WHEN client_journey_stage = 'Customer' THEN amount      ELSE 0 END) AS won_amount,
+        SUM(CASE WHEN client_journey_stage = 'Customer' THEN mrr         ELSE 0 END) AS won_mrr,
+        SUM(CASE WHEN client_journey_stage = 'Customer' THEN ef_mrr      ELSE 0 END) AS won_ef_mrr,
+        SUM(CASE WHEN client_journey_stage = 'Customer' THEN otp_only    ELSE 0 END) AS won_otp_only,
+        SUM(CASE WHEN client_journey_stage = 'Customer' THEN mrr_lt_12   ELSE 0 END) AS won_mrr_lt_12,
+        SUM(CASE WHEN client_journey_stage = 'Customer' THEN implem_fee  ELSE 0 END) AS won_implem_fee
+    FROM shared.revops.silver_deals
+    WHERE LOWER(deal_name) NOT LIKE '%renewal%'
+    GROUP BY 1,2,3,4
+),
+
+dq_summary AS (
+    SELECT
+        DATE_TRUNC('month', create_date) AS metric_month,
+        pipeline_name, segment, department_source_clean,
+        COUNT(DISTINCT deal_id) AS dq_leads
+    FROM shared.revops.silver_deals
+    WHERE stage_label = 'Disqualified' AND qualified_lead = 'Yes'
+      AND LOWER(deal_name) NOT LIKE '%renewal%'
+    GROUP BY 1,2,3,4
+),
+
+velocity AS (
+    SELECT
+        DATE_TRUNC('month', sd.close_date) AS metric_month,
+        sd.pipeline_name, sd.segment, sd.department_source_clean,
+        AVG(sd.deal_velocity_days * 1.0) AS avg_deal_velocity
+    FROM shared.revops.silver_deals sd
+    INNER JOIN availed_deals ad ON sd.deal_id = ad.deal_id
+    WHERE sd.client_journey_stage = 'Customer'
+      AND LOWER(sd.deal_name) NOT LIKE '%renewal%'
+    GROUP BY 1,2,3,4
+),
+
+pipeline_mrr AS (
+    SELECT
+        DATE_TRUNC('month', sd.projected_close_date) AS metric_month,
+        sd.pipeline_name, sd.segment, sd.department_source_clean,
+        CASE
+            WHEN DATE_TRUNC('month', sd.projected_close_date) < DATE_TRUNC('month', CURRENT_DATE())
+                THEN 0
+            ELSE SUM(COALESCE(sli.mrr, 0))
+        END AS mrr_in_pipeline
+    FROM shared.revops.silver_deals sd
+    LEFT JOIN shared.revops.silver_line_items sli ON sd.deal_id = sli.deal_id
+    WHERE sd.client_journey_stage = 'Opportunity'
+      AND sd.projected_close_date IS NOT NULL
+      AND LOWER(sd.deal_name) NOT LIKE '%renewal%'
+    GROUP BY DATE_TRUNC('month', sd.projected_close_date),
+             sd.pipeline_name, sd.segment, sd.department_source_clean
+),
+
+base_keys AS (
+    SELECT metric_month, pipeline_name, segment, department_source_clean FROM ql       UNION
+    SELECT metric_month, pipeline_name, segment, department_source_clean FROM sqls     UNION
+    SELECT metric_month, pipeline_name, segment, department_source_clean FROM won_lost_bookings UNION
+    SELECT metric_month, pipeline_name, segment, department_source_clean FROM dq_summary UNION
+    SELECT metric_month, pipeline_name, segment, department_source_clean FROM velocity UNION
+    SELECT metric_month, pipeline_name, segment, department_source_clean FROM pipeline_mrr
+)
+
+SELECT
+    bk.metric_month, bk.pipeline_name, bk.segment, bk.department_source_clean,
+    COALESCE(q.qualified_leads, 0)          AS qualified_leads,
+    COALESCE(s.sales_qualified_leads, 0)    AS sales_qualified_leads,
+    COALESCE(wlb.won_deals, 0)              AS won_deals,
+    COALESCE(wlb.lost_deals, 0)             AS lost_deals,
+    COALESCE(dqs.dq_leads, 0)              AS dq_leads,
+    ROUND(CASE WHEN COALESCE(q.qualified_leads,0)=0 THEN 0
+               ELSE COALESCE(s.sales_qualified_leads,0)*100.0/COALESCE(q.qualified_leads,0) END, 2) AS sql_pct,
+    ROUND(CASE WHEN COALESCE(wlb.won_deals,0)+COALESCE(wlb.lost_deals,0)=0 THEN 0
+               ELSE COALESCE(wlb.won_deals,0)*100.0/(COALESCE(wlb.won_deals,0)+COALESCE(wlb.lost_deals,0)) END, 2) AS win_rate,
+    ROUND(CASE WHEN COALESCE(q.qualified_leads,0)=0 THEN 0
+               ELSE COALESCE(dqs.dq_leads,0)*100.0/COALESCE(q.qualified_leads,0) END, 2) AS dq_rate,
+    COALESCE(wlb.won_amount, 0)             AS won_amount,
+    COALESCE(wlb.won_mrr, 0)               AS won_mrr,
+    COALESCE(wlb.won_ef_mrr, 0)            AS won_ef_mrr,
+    COALESCE(wlb.won_otp_only, 0)          AS won_otp_only,
+    COALESCE(wlb.won_mrr_lt_12, 0)         AS won_mrr_lt_12,
+    COALESCE(wlb.won_implem_fee, 0)        AS won_implem_fee,
+    ROUND(CASE WHEN COALESCE(wlb.won_deals,0)=0 THEN 0
+               ELSE COALESCE(wlb.won_mrr,0)*1.0/COALESCE(wlb.won_deals,0) END, 2) AS avg_deal_size,
+    ROUND(COALESCE(v.avg_deal_velocity, 0), 2) AS avg_deal_velocity,
+    COALESCE(pm.mrr_in_pipeline, 0)         AS mrr_in_pipeline
+FROM base_keys bk
+LEFT JOIN ql q           ON bk.metric_month=q.metric_month           AND bk.pipeline_name=q.pipeline_name           AND bk.segment=q.segment           AND bk.department_source_clean=q.department_source_clean
+LEFT JOIN sqls s         ON bk.metric_month=s.metric_month           AND bk.pipeline_name=s.pipeline_name           AND bk.segment=s.segment           AND bk.department_source_clean=s.department_source_clean
+LEFT JOIN won_lost_bookings wlb ON bk.metric_month=wlb.metric_month  AND bk.pipeline_name=wlb.pipeline_name  AND bk.segment=wlb.segment  AND bk.department_source_clean=wlb.department_source_clean
+LEFT JOIN dq_summary dqs ON bk.metric_month=dqs.metric_month         AND bk.pipeline_name=dqs.pipeline_name         AND bk.segment=dqs.segment         AND bk.department_source_clean=dqs.department_source_clean
+LEFT JOIN velocity v     ON bk.metric_month=v.metric_month           AND bk.pipeline_name=v.pipeline_name           AND bk.segment=v.segment           AND bk.department_source_clean=v.department_source_clean
+LEFT JOIN pipeline_mrr pm ON bk.metric_month=pm.metric_month         AND bk.pipeline_name=pm.pipeline_name         AND bk.segment=pm.segment         AND bk.department_source_clean=pm.department_source_clean;` }];
 
 (function renderSqlBlocks() {
   const c = document.getElementById('sql-blocks-container');
