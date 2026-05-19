@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="if(window._radarGsiReady)initGoogleSignIn()"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,sans-serif;background:#030712;color:#e2e8f0}
@@ -2096,11 +2096,11 @@ function initGoogleSignIn() {
     if (window.google) {
       initGoogleSignIn();
     } else {
-      document.addEventListener('DOMContentLoaded', () => {
-        const interval = setInterval(() => {
-          if (window.google) { clearInterval(interval); initGoogleSignIn(); }
-        }, 100);
-      });
+      window._radarGsiReady = true;
+      // Fallback polling in case onload fires before flag is set
+      const interval = setInterval(() => {
+        if (window.google) { clearInterval(interval); initGoogleSignIn(); }
+      }, 100);
     }
   }
 })();
