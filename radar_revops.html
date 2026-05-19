@@ -529,6 +529,9 @@ body{font-family:'Rubik','Bahnschrift Light SemiCondensed','Bahnschrift',Arial,s
     </div>
     <div class="filter-group" id="cat-filters"></div>
     <span id="dp-count" style="font-size:12px;color:#636E72;white-space:nowrap">43 metrics</span>
+    <button id="dp-refresh-btn" class="refresh-btn" onclick="refreshDatapedia()" style="background:linear-gradient(135deg,#0984e3,#6c5ce7);color:#fff;border-color:rgba(109,92,231,0.5);font-size:13px;border-radius:8px;padding:7px 16px;">
+      <span class="rb-icon">⟳</span> Sync DataPedia
+    </button>
   </div>
   <div class="sync-bar" id="dp-sync-bar"></div>
 <div class="stats-bar" id="stats-bar"></div>
@@ -643,7 +646,7 @@ USE SCHEMA revops;
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 • shared.revops.gold_monthly_exec_summary → pre-aggregated KPIs (PRIMARY)
 • shared.revops.gold_targets → targets (MRR, QL, Won, EF MRR)
-• shared.revops.gold_metrics_datapedia → approved metric definitions
+• shared.revops.datapedia_approved → approved metric definitions
 
 🥈 SILVER TABLES (ONLY FOR DRILLDOWN OR MISSING METRICS)
 • shared.revops.silver_deals → 1 row per deal
@@ -660,22 +663,35 @@ USE SCHEMA revops;
    CASE WHEN UPPER(segment) = 'MICRO' THEN 'SME' ELSE segment END
 
 3. LEAD-BASED FUNNEL LOGIC (FINAL):
-   Base Population → qualified_lead = 'Yes'
+
+   MKT INBOUND FUNNEL (department_source_clean = 'MKT Inbound'):
+   All metrics cohorted by CREATE DATE.
 
    Funnel Stage  | Logic
    ─────────────────────────────────────────────────────────────
-   MQL (Leads)   | qualified_lead = 'Yes'
-   SQL           | qualified_lead = 'Yes' AND client_journey_stage = 'Opportunity'
-   Won Leads     | qualified_lead = 'Yes' AND client_journey_stage = 'Customer'
-   Lost Leads    | qualified_lead = 'Yes' AND client_journey_stage = 'Closed Lost'
+   MQL           | department_source_clean = 'MKT Inbound'
+                 | AND qualified_lead = 'Yes'
+                 | AND pipeline_name IN ('Sales Pipeline', 'Unified Channel Pipeline')
+                 | Filtered by: create_date
+   SQL           | All MQL deals WHERE client_journey_stage <> 'MQL'
+                 | (any stage that has progressed past MQL)
+   Won Leads     | All MQL deals WHERE client_journey_stage = 'Customer'
+                 | Filtered by: create_date (same cohort as MQL)
+   Lost Leads    | All MQL deals WHERE client_journey_stage = 'Closed Lost'
+   UQL           | department_source_clean = 'MKT Inbound'
+                 | AND pipeline_name = 'PH Upsell Pipeline'
+                 | No qualified_lead filter required
+                 | Filtered by: create_date
 
-   ⚠️ MQL is NOT stage-based → it is lead qualification-based
+   ⚠️ MQL = MKT Inbound. Always apply department_source_clean = 'MKT Inbound' for MQL metrics.
+   ⚠️ SQL is NOT stage = Opportunity — it is any stage EXCEPT 'MQL'
+   ⚠️ Won is cohorted by create_date, NOT close_date
    ⚠️ Always use DISTINCT deal_id for counts
 
 4. DATE LOGIC:
-   Pipeline (TMRR)     → projected_close_date
-   Won / Revenue       → close_date
-   Funnel / Conversion → create_date
+   Pipeline (TMRR)              → projected_close_date
+   Won / Revenue (general)      → close_date
+   MKT Inbound Funnel (MQL/SQL/Won/UQL) → create_date
 
 5. MRR LOGIC:
    mrr    → recurring revenue
@@ -698,14 +714,17 @@ Join gold_targets using: metric_month, pipeline_name, segment, department_source
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🧠 APPROVED METRIC DEFINITIONS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• MQL          → COUNT(DISTINCT deal_id) WHERE qualified_lead = 'Yes'
-• SQL          → COUNT(DISTINCT deal_id) WHERE qualified_lead = 'Yes' AND client_journey_stage = 'Opportunity'
-• Won Leads    → COUNT(DISTINCT deal_id) WHERE qualified_lead = 'Yes' AND client_journey_stage = 'Customer'
-• Lost Leads   → COUNT(DISTINCT deal_id) WHERE qualified_lead = 'Yes' AND client_journey_stage = 'Closed Lost'
-• MQL TMRR     → SUM(mrr) using projected_close_date
-• SQL TMRR     → SUM(mrr) where stage = Opportunity
-• Won MRR      → SUM(mrr) where stage = Customer
-• EmFi MRR     → SUM(ef_mrr) where stage = Customer
+• MQL          → COUNT(DISTINCT deal_id) WHERE department_source_clean = 'MKT Inbound' AND qualified_lead = 'Yes'
+                  AND pipeline_name IN ('Sales Pipeline','Unified Channel Pipeline') | date basis: create_date
+• SQL          → COUNT(DISTINCT deal_id) from MQL base WHERE client_journey_stage <> 'MQL'
+• Won Leads    → COUNT(DISTINCT deal_id) from MQL base WHERE client_journey_stage = 'Customer' | date basis: create_date
+• Lost Leads   → COUNT(DISTINCT deal_id) from MQL base WHERE client_journey_stage = 'Closed Lost'
+• UQL          → COUNT(DISTINCT deal_id) WHERE department_source_clean = 'MKT Inbound'
+                  AND pipeline_name = 'PH Upsell Pipeline' | no qualified_lead filter | date basis: create_date
+• MQL TMRR     → SUM(mrr) from MQL base using projected_close_date
+• SQL TMRR     → SUM(mrr) where client_journey_stage = 'Opportunity'
+• Won MRR      → SUM(mrr) from Won base | date basis: create_date
+• EmFi MRR     → SUM(ef_mrr) from Won base
 • Avg Deal Value → won_mrr ÷ won_deals
 • Deal Velocity  → AVG(deal_velocity_days)
 
@@ -736,7 +755,7 @@ Channel source | Sales rep | HubSpot team | Deal type
 🚫 DO NOT:
 • Output a Databricks notebook, Python script, or Power BI report
 • Use raw HubSpot logic
-• Redefine metrics outside gold_metrics_datapedia
+• Redefine metrics outside datapedia_approved
 • Mix date logic across metric types
 • Include renewal deals
 • Ignore the qualified_lead filter
@@ -1025,7 +1044,7 @@ The HTML file never talks to Databricks directly.
 🥇 GOLD TABLES (use first):
 • shared.revops.gold_monthly_exec_summary → pre-aggregated KPIs
 • shared.revops.gold_targets → targets (MRR, QL, Won)
-• shared.revops.gold_metrics_datapedia → approved definitions
+• shared.revops.datapedia_approved → approved definitions
 
 🥈 SILVER (drilldown only):
 • shared.revops.silver_deals → 1 row per deal
@@ -1041,12 +1060,14 @@ The HTML file never talks to Databricks directly.
 2. SEGMENT STANDARDIZATION:
    CASE WHEN UPPER(segment) = 'MICRO' THEN 'SME' ELSE segment END
 
-3. LEAD-BASED FUNNEL (always use qualified_lead, never stage alone):
-   MQL  → qualified_lead = 'Yes'
-   SQL  → qualified_lead = 'Yes' AND client_journey_stage = 'Opportunity'
-   Won  → qualified_lead = 'Yes' AND client_journey_stage = 'Customer'
-   Lost → qualified_lead = 'Yes' AND client_journey_stage = 'Closed Lost'
+3. LEAD-BASED FUNNEL (MKT Inbound — all metrics by create_date):
+   MQL  → dept = 'MKT Inbound' AND qualified_lead = 'Yes' AND pipeline IN ('Sales Pipeline','Unified Channel Pipeline')
+   SQL  → MQL base WHERE client_journey_stage <> 'MQL'
+   Won  → MQL base WHERE client_journey_stage = 'Customer'
+   Lost → MQL base WHERE client_journey_stage = 'Closed Lost'
+   UQL  → dept = 'MKT Inbound' AND pipeline = 'PH Upsell Pipeline' (no qualified_lead filter)
    ⚠️ Always DISTINCT deal_id for counts
+   ⚠️ MQL = MKT Inbound. SQL ≠ Opportunity stage — it is any stage past MQL.
 
 4. MRR: mrr = recurring revenue · ef_mrr = Embedded Finance (ReadyCash + ReadyWage)
 5. Always use department_source_clean (NOT raw department_source)
@@ -1794,25 +1815,27 @@ async function refreshDatapedia() {
   if (!LC.connected) { openConnModal(); return; }
   const btn = document.getElementById('dp-refresh-btn');
   btn.classList.add('spinning'); btn.disabled = true;
-  setSyncBar('dp-sync-bar', '⟳ Syncing from shared.revops.gold_metrics_datapedia…', '');
+  setSyncBar('dp-sync-bar', '⟳ Syncing from shared.revops.datapedia_approved…', '');
   try {
-    const rows = await dbQuery('SELECT * FROM shared.revops.gold_metrics_datapedia ORDER BY category, metric_name');
-    if (!rows.length) { setSyncBar('dp-sync-bar', '⚠ No rows returned from gold_metrics_datapedia.', 'err'); return; }
+    const rows = await dbQuery('SELECT * FROM shared.revops.datapedia_approved ORDER BY category, metric_name');
+    if (!rows.length) { setSyncBar('dp-sync-bar', '⚠ No rows returned from datapedia_approved.', 'err'); return; }
 
     const mapped = rows.map(function(r) {
       return {
-        id:                r.metric_id         || r.id              || '',
-        name:              r.metric_name       || r.name            || '',
-        category:          r.category          || '',
-        definition:        r.definition        || '',
-        business_question: r.business_question || '',
-        formula:           r.formula           || '',
-        sql:               r.sql_template      || r.sql             || '',
-        filters:           r.filter_inclusions || r.filters         || '',
-        exclusions:        r.filter_exclusions || r.exclusions      || '',
-        sources:           r.data_sources      || r.sources         || '',
-        status:            r.status            || 'Approved',
-        notes:             r.notes             || ''
+        id:                r.metric_id          || r.id                  || '',
+        name:              r.metric_name        || r.name                || '',
+        category:          r.category           || '',
+        definition:        r.definition         || '',
+        business_question: r.business_question  || '',
+        formula:           r.formula_logic      || r.formula             || '',
+        sql:               r.sql_logic          || r.sql_template        || r.sql  || '',
+        filters:           r.filters_inclusions || r.filter_inclusions   || r.filters || '',
+        exclusions:        r.filter_exclusions  || r.exclusions          || '',
+        sources:           r.source_table       || r.data_sources        || r.sources || '',
+        grain:             r.grain              || '',
+        owner:             r.owner              || '',
+        status:            r.status             || 'Active',
+        notes:             r.notes              || ''
       };
     });
 
