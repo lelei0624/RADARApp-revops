@@ -2979,6 +2979,7 @@ var BUILDER_CAT_LABELS = {All:'All',Finance:'Finance',Funnel:'Funnel',Revenue:'R
 function _getBuilderMetrics() { return window._LIVE_METRICS || METRICS || []; }
 
 function builderFilterMetrics() {
+  if (!_builderInited) { _builderInited = true; _builderInitCatFilters(); }
   var inp = document.getElementById('builder-search');
   _builderSearchVal = inp ? inp.value.toLowerCase() : '';
   var filtered = _getBuilderMetrics().filter(function(m) {
@@ -3167,10 +3168,8 @@ window._builderInit         = _builderInitAll;
 window._builderToggleMetric = builderToggleMetric;
 window._builderSetCat       = builderSetCat;
 
-// Initialize builder immediately on page load so grid is pre-populated
-document.addEventListener('DOMContentLoaded', function() {
-  _builderInitAll();
-});
+// Initialize builder immediately — HTML is already in DOM when this script runs
+_builderInitAll();
 
 // ── 3D CARD TILT ──
 document.querySelectorAll('.home-card').forEach(card => {
