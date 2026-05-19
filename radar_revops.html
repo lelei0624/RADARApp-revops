@@ -1761,8 +1761,8 @@ function switchTab(t) {
   // Hide sidebar on Home, show on all other sections
   const layout = document.querySelector('.app-layout');
   if (layout) layout.classList.toggle('home-mode', t === 'home');
-  // Initialize Dashboard Builder on first visit
-  if (t === 'builder' && window._builderInit) window._builderInit();
+  // Initialize Dashboard Builder
+  if (t === 'builder') { setTimeout(function(){ if(typeof _builderInitAll==='function') _builderInitAll(); }, 50); }
 }
 
 // ── DATABASE ──
@@ -3070,9 +3070,11 @@ function _builderRenderChips() {
 }
 
 function builderToggleCustomDates() {
-  var sel = document.getElementById('builder-date-range');
-  var cd  = document.getElementById('builder-custom-dates');
-  if (sel&&cd) cd.style.display = sel.value==='Custom'?'flex':'none';
+  var sel = document.getElementById('bd-daterange');
+  var cd  = document.getElementById('bd-custom-dates');
+  var cd2 = document.getElementById('bd-custom-dates-to');
+  if(sel&&cd) cd.style.display=sel.value==='Custom'?'flex':'none';
+  if(sel&&cd2) cd2.style.display=sel.value==='Custom'?'flex':'none';
 }
 
 function _builderDateSQL(val,from,to) {
@@ -3086,13 +3088,13 @@ function _builderDateSQL(val,from,to) {
 }
 
 function _builderRenderPrompt() {
-  var name     = (document.getElementById('builder-dash-name')||{}).value||'RevOps Dashboard';
-  var dateVal  = (document.getElementById('builder-date-range')||{}).value||'MTD';
-  var fromDate = (document.getElementById('builder-from')||{}).value||'';
-  var toDate   = (document.getElementById('builder-to')||{}).value||'';
-  var pipeline = (document.getElementById('builder-pipeline')||{}).value||'All Pipelines';
-  var segment  = (document.getElementById('builder-segment')||{}).value||'All Segments';
-  var viewType = (document.getElementById('builder-view-type')||{}).value||'KPI Cards + Charts';
+  var name     = (document.getElementById('bd-name')||{}).value||'RevOps Dashboard';
+  var dateVal  = (document.getElementById('bd-daterange')||{}).value||'MTD';
+  var fromDate = (document.getElementById('bd-from')||{}).value||'';
+  var toDate   = (document.getElementById('bd-to')||{}).value||'';
+  var pipeline = (document.getElementById('bd-pipeline')||{}).value||'All Pipelines';
+  var segment  = (document.getElementById('bd-segment')||{}).value||'All Segments';
+  var viewType = (document.getElementById('bd-viewtype')||{}).value||'KPI Cards + Charts';
   var dateSQL  = _builderDateSQL(dateVal,fromDate,toDate);
   var pipeSQL  = pipeline==='All Pipelines'
     ? "pipeline_name IN ('Sales Pipeline','PH Upsell Pipeline','Unified Channel Pipeline','TH Sales Pipeline')"
@@ -3164,6 +3166,13 @@ function _builderInitAll() {
 window._builderInit         = _builderInitAll;
 window._builderToggleMetric = builderToggleMetric;
 window._builderSetCat       = builderSetCat;
+
+
+// Dashboard Builder: init fallback on tab activation
+document.addEventListener('click', function(e) {
+  var tab = e.target.closest('[onclick*="switchTab(\'builder\')"]');
+  if (tab) setTimeout(function(){ _builderInitAll(); }, 100);
+});
 
 // ── 3D CARD TILT ──
 document.querySelectorAll('.home-card').forEach(card => {
