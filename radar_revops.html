@@ -2308,34 +2308,9 @@ updateConnBadge();
 // ── LOGIN ──
 const RADAR_CLIENT_ID = '1083460218316-p1tf3fg79257vp77s8rvmf6e9ver6uts.apps.googleusercontent.com';
 
-const ALLOWED_EMAILS = new Set([
-  'apanares@sprout.ph',
-  'nvicente@sprout.ph',
-  'mcpartosa@sprout.ph',
-  'jsayseng@sprout.ph',
-  'rbelardo@sprout.ph',
-  'fibrahim@sprout.ph',
-  'lurbina@sprout.ph',
-  'rrayos@sprout.ph',
-  'louieb@sprout.ph',
-  'jmchumacera@sprout.ph',
-  'crysteli@sprout.ph',
-  'jllopez@sprout.ph',
-  'shairaa@sprout.ph',
-  'jvillanueva@sprout.ph',
-  'amagalona@sprout.ph',
-  'fguasque@sprout.ph',
-  'dpomento@sprout.ph',
-  'mpulido@sprout.ph',
-  'katryns@sprout.ph',
-  'mgaluego@sprout.ph',
-  'rnjaranilla@sprout.ph',
-  'nduran@sprout.ph',
-  'jlosbanos@sprout.ph',
-  'jsy@sprout.ph',
-  'jsanluis@sprout.ph',
-  'pccastillo@sprout.ph',
-]);
+function isSproutEmail(email) {
+  return typeof email === 'string' && email.toLowerCase().endsWith('@sprout.ph');
+}
 
 function parseJwt(token) {
   try {
@@ -2350,8 +2325,8 @@ function handleGoogleSignIn(response) {
     return;
   }
   const email = payload.email.toLowerCase();
-  if (!ALLOWED_EMAILS.has(email)) {
-    document.getElementById('login-error').textContent = '⛔ ' + email + ' is not on the access list. Contact RevOps to request access.';
+  if (!isSproutEmail(email)) {
+    document.getElementById('login-error').textContent = '⛔ ' + email + ' is not a Sprout Solutions account. Please sign in with your @sprout.ph email.';
     // Sign out of Google so user can try a different account
     if (window.google) google.accounts.id.disableAutoSelect();
     return;
@@ -2423,7 +2398,7 @@ function showFallbackBtn() {
 // Check existing session on load
 (function() {
   const stored = localStorage.getItem('radar_user_email');
-  if (stored && ALLOWED_EMAILS.has(stored)) {
+  if (stored && isSproutEmail(stored)) {
     document.getElementById('login-overlay').style.display = 'none';
     document.getElementById('app-root').style.display = 'block';
     document.getElementById('user-email-display').textContent = stored;
