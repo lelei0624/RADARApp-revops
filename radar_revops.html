@@ -1416,7 +1416,7 @@ DATABRICKS_TOKEN</div>
       <div class="bd-section">
         <div class="bd-section-title">Sub Filters <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:rgba(255,255,255,.3)">Select which filters to add to the dashboard</span></div>
         <div class="bd-check-list" id="bd-subfilter-group" style="display:flex;flex-wrap:wrap;gap:8px 16px">
-          <label class="bd-check-item"><input type="checkbox" value="Segment (segment_official)"> Segment <span class="bd-col-tag">segment_official</span></label>
+          <label class="bd-check-item"><input type="checkbox" value="Segment (column: segment in silver_deals, segment_official in gold tables)"> Segment <span class="bd-col-tag">segment</span></label>
           <label class="bd-check-item"><input type="checkbox" value="Deal Stage (stage_label)"> Deal Stage <span class="bd-col-tag">stage_label</span></label>
           <label class="bd-check-item"><input type="checkbox" value="Industry (industry)"> Industry <span class="bd-col-tag">industry</span></label>
           <label class="bd-check-item"><input type="checkbox" value="Sub-Industry (Sub_industry)"> Sub-Industry <span class="bd-col-tag">Sub_industry</span></label>
@@ -3934,7 +3934,8 @@ function _builderRenderPromptInner() {
     + '         implem_fee, mrr_lt_12, deal_velocity_days, sales_rep, partner_on_record,\n'
     + '         CASE WHEN UPPER(department_source_clean)=\'MICRO\' THEN \'SME\'\n'
     + '              ELSE department_source_clean END AS department_source_clean,\n'
-    + '         segment_official, pipeline_name, original_channel_source\n'
+    + '         CASE WHEN UPPER(segment)=\'MICRO\' THEN \'SME\' ELSE segment END AS segment,\n'
+    + '         pipeline_name, original_channel_source\n'
     + '  FROM shared.revops.silver_deals\n'
     + '  WHERE ' + pipeSQL + '\n'
     + '    AND deal_type NOT IN (\'Renewal\',\'Upsell - Renewal\')\n'
@@ -4013,7 +4014,8 @@ function _builderRenderPromptInner() {
     + '                otp_only (one-time payment), mrr_lt_12 (recurring <12 mo), implem_fee,\n'
     + '                amount, tcv, arr\n'
     + '  PEOPLE:       sales_rep, co_owner, inbound_lead, deal_split_owner_names, hubspot_team\n'
-    + '  SEGMENTATION: segment  [Enterprise | Mid-Market | SME — NOTE: MICRO maps to SME],\n'
+    + '  SEGMENTATION: segment  [Enterprise | Mid-Market | SME — NOTE: MICRO maps to SME]\n'
+    + '                ⚠️  Column is "segment" in silver_deals — NOT "segment_official" (that only exists in gold tables)\n'
     + '                client_type, city_municipality_province, headcount\n'
     + '  SOURCE:       department_source_clean  [MKT Inbound | LDU Outbound | Sales Outbound |\n'
     + '                  Channels | Product Led Growth (PLG) | Upsell Outbound | CSM Inbound]\n'
@@ -4079,7 +4081,8 @@ function _builderRenderPromptInner() {
     + '1. EXCLUDE RENEWALS (always):\n'
     + '   deal_type NOT IN (\'Renewal\',\'Upsell - Renewal\') AND LOWER(COALESCE(deal_name,\'\')) NOT LIKE \'%renewal%\'\n\n'
     + '2. SEGMENT STANDARDIZATION:\n'
-    + '   CASE WHEN UPPER(segment_official)=\'MICRO\' THEN \'SME\' ELSE segment_official END\n\n'
+    + '   In silver_deals the column is "segment" (NOT "segment_official" — that only exists in gold tables).\n'
+    + '   Always apply: CASE WHEN UPPER(segment)=\'MICRO\' THEN \'SME\' ELSE segment END\n\n'
     + '3. Always use department_source_clean (NOT raw department_source)\n'
     + '4. MRR = recurring revenue | ef_mrr = Embedded Finance (ReadyCash + ReadyWage)\n\n'
     + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
