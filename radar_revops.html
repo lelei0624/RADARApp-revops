@@ -1433,19 +1433,29 @@ DATABRICKS_TOKEN</div>
                   <!-- Views to Include -->
       <div class="bd-section">
         <div class="bd-section-title">Views to Include <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:rgba(255,255,255,.25)">(select all that apply)</span></div>
-        <div class="bd-views-grid" id="bd-views-group">
+        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:10px;line-height:1.6">
+          Dashboard is structured into <strong style="color:rgba(255,255,255,.5)">2–3 pages</strong>. Select which sections to include — deal table is always added on the last page.
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.2);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase">Page 1 — Summary</div>
+        <div class="bd-views-grid" id="bd-views-group" style="margin-bottom:12px">
           <label class="bd-view-card bd-view-checked"><input type="checkbox" value="summary" checked onchange="bdViewToggle(this)"><span class="bd-view-icon">📊</span><span class="bd-view-label">Summary KPIs</span></label>
-          <label class="bd-view-card"><input type="checkbox" value="per_rep" onchange="bdViewToggle(this)"><span class="bd-view-icon">👤</span><span class="bd-view-label">Per Rep</span></label>
-          <label class="bd-view-card"><input type="checkbox" value="per_team" onchange="bdViewToggle(this)"><span class="bd-view-icon">👥</span><span class="bd-view-label">Per Team</span></label>
-          <label class="bd-view-card"><input type="checkbox" value="per_segment" onchange="bdViewToggle(this)"><span class="bd-view-icon">🎯</span><span class="bd-view-label">Per Segment</span></label>
-          <label class="bd-view-card"><input type="checkbox" value="per_pipeline" onchange="bdViewToggle(this)"><span class="bd-view-icon">🔀</span><span class="bd-view-label">Per Pipeline</span></label>
-          <label class="bd-view-card"><input type="checkbox" value="per_industry" onchange="bdViewToggle(this)"><span class="bd-view-icon">🏭</span><span class="bd-view-label">Per Industry</span></label>
-          <label class="bd-view-card"><input type="checkbox" value="trend" onchange="bdViewToggle(this)"><span class="bd-view-icon">📈</span><span class="bd-view-label">Trend / Time Series</span></label>
+          <label class="bd-view-card"><input type="checkbox" value="trend" onchange="bdViewToggle(this)"><span class="bd-view-icon">📈</span><span class="bd-view-label">Time-Series Charts <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.3)">bar charts</span></span></label>
+          <label class="bd-view-card"><input type="checkbox" value="comparison" onchange="bdViewToggle(this)"><span class="bd-view-icon">⚖️</span><span class="bd-view-label">MoM Comparison <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.3)">bar chart</span></span></label>
           <label class="bd-view-card"><input type="checkbox" value="funnel" onchange="bdViewToggle(this)"><span class="bd-view-icon">🔽</span><span class="bd-view-label">Funnel Breakdown</span></label>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.2);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase">Page 2 — Breakdown</div>
+        <div class="bd-views-grid" style="margin-bottom:12px">
+          <label class="bd-view-card"><input type="checkbox" value="per_rep" onchange="bdViewToggle(this)"><span class="bd-view-icon">👤</span><span class="bd-view-label">By Rep <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.3)">horiz. bar</span></span></label>
+          <label class="bd-view-card"><input type="checkbox" value="per_team" onchange="bdViewToggle(this)"><span class="bd-view-icon">👥</span><span class="bd-view-label">By Team <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.3)">horiz. bar</span></span></label>
+          <label class="bd-view-card"><input type="checkbox" value="per_segment" onchange="bdViewToggle(this)"><span class="bd-view-icon">🎯</span><span class="bd-view-label">By Segment <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.3)">SME / ENT</span></span></label>
+          <label class="bd-view-card"><input type="checkbox" value="per_pipeline" onchange="bdViewToggle(this)"><span class="bd-view-icon">🔀</span><span class="bd-view-label">By Pipeline</span></label>
+          <label class="bd-view-card"><input type="checkbox" value="per_industry" onchange="bdViewToggle(this)"><span class="bd-view-icon">🏭</span><span class="bd-view-label">By Industry</span></label>
           <label class="bd-view-card"><input type="checkbox" value="leaderboard" onchange="bdViewToggle(this)"><span class="bd-view-icon">🏆</span><span class="bd-view-label">Leaderboard</span></label>
-          <label class="bd-view-card"><input type="checkbox" value="comparison" onchange="bdViewToggle(this)"><span class="bd-view-icon">⚖️</span><span class="bd-view-label">MoM Comparison</span></label>
-          <label class="bd-view-card"><input type="checkbox" value="table" onchange="bdViewToggle(this)"><span class="bd-view-icon">📋</span><span class="bd-view-label">Data Table</span></label>
-          <label class="bd-view-card"><input type="checkbox" value="distribution" onchange="bdViewToggle(this)"><span class="bd-view-icon">🥧</span><span class="bd-view-label">Distribution Charts</span></label>
+          <label class="bd-view-card"><input type="checkbox" value="distribution" onchange="bdViewToggle(this)"><span class="bd-view-icon">🥧</span><span class="bd-view-label">Distribution <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.3)">donut/bar</span></span></label>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.2);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase">Page 3 — Deal Details</div>
+        <div class="bd-views-grid">
+          <label class="bd-view-card bd-view-checked" style="opacity:.6;pointer-events:none"><input type="checkbox" checked disabled><span class="bd-view-icon">📋</span><span class="bd-view-label">Deal Table <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.3)">always included</span></span></label>
         </div>
       </div>
 
@@ -3873,18 +3883,17 @@ function _builderRenderPromptInner() {
 
   // ── View descriptions ──
   var viewLabels = {
-    summary:      'Summary KPI Cards (top-level metrics)',
-    per_rep:      'Per Sales Rep breakdown table + charts',
-    per_team:     'Per Team breakdown table + charts',
-    per_segment:  'Per Segment breakdown (SME / ENT / Channels)',
-    per_pipeline: 'Per Pipeline breakdown',
-    per_industry: 'Per Industry breakdown',
-    trend:        'Trend / Time-series charts (MoM, WoW)',
-    funnel:       'Funnel visualization (lead → SQL → won)',
-    leaderboard:  'Leaderboard ranking (rep/team performance)',
-    comparison:   'Month-over-Month comparison table',
-    table:        'Data Table (raw/filtered records in sortable table)',
-    distribution: 'Distribution Charts (breakdown by segment, industry, etc.)'
+    summary:      '[Page 1] Summary KPI scorecards + key bar charts',
+    trend:        '[Page 1] Time-series bar charts (MRR, Won Deals, Pipeline over time)',
+    comparison:   '[Page 1] MoM Comparison — side-by-side bar chart (current vs prior month)',
+    funnel:       '[Page 1] Funnel breakdown (lead → SQL → won)',
+    per_rep:      '[Page 2] By Rep — horizontal bar chart, rep names on Y-axis, sorted by value, zero-value reps hidden',
+    per_team:     '[Page 2] By Team — horizontal bar chart, team names on Y-axis, sorted by value, zero-value teams hidden',
+    per_segment:  '[Page 2] By Segment — only SME and ENT, no other segment values',
+    per_pipeline: '[Page 2] By Pipeline/Stage — suppress stages with zero deals',
+    per_industry: '[Page 2] By Industry breakdown',
+    leaderboard:  '[Page 2] Leaderboard ranking (rep/team performance)',
+    distribution: '[Page 2] Distribution charts (donut/bar) — suppress zero slices'
   };
   var viewList = views.length
     ? views.map(function(v){ return '- ' + (viewLabels[v] || v); }).join('\n')
